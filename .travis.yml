@@ -8,10 +8,11 @@ install:
 services:
   - mongodb
 
-scripts: npm run test
+scripts: 
+  - npm run test
 
 #before_script:
 # - psql -c 'create database ah_zinnia;' -U postgres
 
 after_success:
-  - npm run coveralls
+  - coveralls < coverage/lcov.info
