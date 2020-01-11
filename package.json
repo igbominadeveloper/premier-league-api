@@ -6,24 +6,6 @@
   "author": "",
   "license": "ISC",
   "main": "src/server.js",
-  "nyc": {
-    "require": [
-      "@babel/register"
-    ],
-    "exclude": [
-      "doc",
-      "coverage",
-      "src/db/migrations",
-      "src/db/seeders"
-    ],
-    "reporter": [
-      "lcov",
-      "text"
-    ],
-    "sourceMap": false,
-    "instrument": false,
-    "all": true
-  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
@@ -39,21 +21,20 @@
       "git add --force"
     ]
   },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true
+  },
   "scripts": {
     "start": "node build/server.js",
     "start:dev": "NODE_ENV=development nodemon --exec babel-node src/server.js",
     "check-staged": "lint-staged",
     "prettier": "prettier --write '**/*.{js,jsx}'",
-    "pretest": "NODE_ENV=test npm run lint && npm run prettier && npm run db:migrate:testdb && npm run seedall",
-    "test": "NODE_ENV=test nyc mocha --recursive src/tests --require @babel/register --exit",
-    "test:watch": "NODE_ENV=test mocha  --recursive src/tests --require @babel/register --watch",
+    "test": "NODE_ENV=test jest",
+    "test:coverage": "NODE_ENV=test jest --coverage",
+    "test:watch": "NODE_ENV=test jest --watch",
     "build": "rm -rf build && babel src -d build",
-    "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "db:migrate": "sequelize db:migrate:undo:all && sequelize db:migrate",
-    "db:migrate:testdb": "NODE_ENV=test npm run db:migrate",
-    "lint": "eslint src --fix",
-    "seedall": "NODE_ENV=test sequelize db:seed:all",
-    "coveralls": "cat coverage/lcov.info | coveralls"
+    "lint": "eslint src --fix"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -76,19 +57,18 @@
     "@babel/runtime": "^7.4.2",
     "acorn": "^7.1.0",
     "babel-eslint": "^10.0.1",
-    "babel-plugin-istanbul": "^5.1.1",
-    "chai": "^4.2.0",
-    "chai-http": "^4.2.1",
-    "coveralls": "^3.0.3",
+    "coveralls": "^3.0.9",
     "eslint": "^5.15.3",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-prettier": "^3.0.1",
+    "faker": "^4.1.0",
+    "handlebars": "^4.5.0",
     "husky": "^1.3.1",
+    "jest": "^24.9.0",
     "lint-staged": "^8.1.5",
-    "mocha": "^6.1.4",
-    "mocha-lcov-reporter": "^1.3.0",
+    "mongodb-memory-server": "^6.2.1",
     "nodemon": "^1.18.10",
     "nyc": "^13.3.0",
     "prettier": "^1.16.4"

@@ -3,9 +3,9 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 import session from 'express-session';
-import mongoose from 'mongoose';
 
 import router from './routes';
+import dbconnect from './config/db';
 
 // Create global app object
 const app = express();
@@ -24,8 +24,8 @@ app.use(
     },
   }),
 );
-// enable morgan logs only in development environment
 
+// enable morgan logs only in development environment
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
@@ -38,27 +38,10 @@ app.use(
 
 app.use(express.json());
 
-// Setup connection to the Mongodb server
-mongoose
-  .connect(process.env.MONGODB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(
-    () => {
-      console.log('Connected to MongoDB');
-    },
-    err => {
-      console.log('MongoDB connection failed: ' + err);
-      process.exit(1);
-    },
-  );
-
 // API routes
 app.use('/api/v1', router);
 
 // Handling unavailable routes
-
 app.all('*', (req, res) =>
   res.status(405).json({
     error: 'Method not allowed',
@@ -68,6 +51,14 @@ app.all('*', (req, res) =>
 const port = process.env.PORT || 5000;
 
 // finally, let's start our server...
-app.listen(port, () => console.log(`Listening on port ${port}`));
+dbconnect().then(async () => {
+  if (!module.parent) {
+    app.listen(port, () => {
+      console.log(
+        `Server running on ${process.env.NODE_ENV} environment, on port ${port}`,
+      );
+    });
+  }
+});
 
 export default app;
