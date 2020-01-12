@@ -3,7 +3,7 @@ import User from '../../db/models/User';
 import * as helpers from '../../utils/helpers';
 
 export const signup = async (req, res) => {
-  const { email, password, fullName } = req.body;
+  const { email, password, fullName, role } = req.body;
 
   try {
     const existingAccount = await helpers.checkIfUserExists({
@@ -24,10 +24,12 @@ export const signup = async (req, res) => {
       email,
       password: hashedPassword,
       fullName,
+      role,
     });
+
     const tokenPayload = {
       id: user.id,
-      email: user.email,
+      role: user.role,
     };
     const token = helpers.generateToken(tokenPayload);
 
@@ -68,7 +70,7 @@ export const login = async (req, res) => {
 
     const tokenPayload = {
       id: existingAccount.id,
-      email: existingAccount.email,
+      role: existingAccount.role,
     };
     const token = helpers.generateToken(tokenPayload);
 

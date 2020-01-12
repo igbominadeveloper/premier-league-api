@@ -2,14 +2,10 @@ import Team from '../../db/models/Team';
 import * as helpers from '../../utils/helpers';
 
 export const create = async (req, res) => {
-  const { name, manager, stadium } = req.body;
+  const { name, manager } = req.body;
 
   try {
-    const existingTeam = await helpers.checkIfTeamExists(
-      name,
-      stadium,
-      manager,
-    );
+    const existingTeam = await helpers.checkIfTeamExists(name, manager);
 
     if (existingTeam.length) {
       return helpers.errorResponse(res, 409, 'This Team exists already');
@@ -22,6 +18,16 @@ export const create = async (req, res) => {
       stadium: newTeam.stadium,
       manager: newTeam.manager,
     });
+  } catch (error) {
+    /* istanbul ignore next */
+    return helpers.serverError(res, error.message);
+  }
+};
+
+export const all = async (req, res) => {
+  try {
+    const allTeams = await Team.find();
+    return helpers.successResponse(res, 200, 'Got all teams', allTeams);
   } catch (error) {
     /* istanbul ignore next */
     return helpers.serverError(res, error.message);

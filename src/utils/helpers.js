@@ -97,19 +97,17 @@ export const generateToken = (payload, expiresIn = '30days') =>
  * Check if Team exists
  *
  * @param {String} name
- * @param {String} stadium
  * @param {String} manager
  */
-export const checkIfTeamExists = (name, stadium, manager) =>
-  Team.find({ name: name.toLowerCase() }).or([
-    { stadium: stadium.toLowerCase() },
-    { manager: manager.toLowerCase() },
-  ]);
+export const checkIfTeamExists = async (name, manager) =>
+  Team.find()
+    .or({ name: name.toLowerCase() })
+    .or({ manager: manager.toLowerCase() });
 
 /**
  *
  * @param {String} token
- * @returns {Boolean} true if token is valid
+ * @returns {Boolean} decoded token if token is valid
  * @returns {Boolean} false if token is invalid
  */
 export const verifyToken = token => jwt.verify(token, process.env.SECRET_KEY);

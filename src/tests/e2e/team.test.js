@@ -11,7 +11,7 @@ import Team from '../../db/models/Team';
 
 import { generateToken } from '../../utils/helpers';
 
-const createTeamUrl = '/api/v1/teams';
+const teamsUrl = '/api/v1/teams';
 
 let userToken;
 let adminToken;
@@ -33,7 +33,7 @@ afterAll(async done => {
 describe('E2E Team creation', () => {
   it('should throw an error when a token is not present in the request header', async () => {
     const res = await request(app)
-      .post(createTeamUrl)
+      .post(teamsUrl)
       .send(mocks.mockTeam1);
     expect(res.status).toBe(401);
     expect(res.body.message).toBe('Unauthorized user, please login');
@@ -41,7 +41,7 @@ describe('E2E Team creation', () => {
 
   it('should throw an error when the user making the request does not have admin rights', async () => {
     const res = await request(app)
-      .post(createTeamUrl)
+      .post(teamsUrl)
       .set('authorization', `Bearer ${userToken}`)
       .send(mocks.mockTeam1);
     expect(res.status).toBe(403);
@@ -49,7 +49,7 @@ describe('E2E Team creation', () => {
 
   it('should create a team successfully when valid inputs are supplied', async () => {
     const res = await request(app)
-      .post(createTeamUrl)
+      .post(teamsUrl)
       .set('authorization', `Bearer ${adminToken}`)
       .send(mocks.mockTeam1);
     expect(res.status).toBe(201);
@@ -60,7 +60,7 @@ describe('E2E Team creation', () => {
 
   it('should throw an error when the team is existing already', async () => {
     const res = await request(app)
-      .post(createTeamUrl)
+      .post(teamsUrl)
       .set('authorization', `Bearer ${adminToken}`)
       .send(mocks.mockTeam1);
     expect(res.status).toBe(409);
@@ -69,7 +69,7 @@ describe('E2E Team creation', () => {
 
   it('should throw an error when the team name is missing', async () => {
     const res = await request(app)
-      .post(createTeamUrl)
+      .post(teamsUrl)
       .set('authorization', `Bearer ${adminToken}`)
       .send(mocks.missingName);
     expect(res.status).toBe(422);
@@ -78,7 +78,7 @@ describe('E2E Team creation', () => {
 
   it('should throw an error when manager name is missing', async () => {
     const res = await request(app)
-      .post(createTeamUrl)
+      .post(teamsUrl)
       .set('authorization', `Bearer ${adminToken}`)
       .send(mocks.missingManager);
     expect(res.status).toBe(422);
@@ -87,7 +87,7 @@ describe('E2E Team creation', () => {
 
   it('should throw an error when stadium name is missing', async () => {
     const res = await request(app)
-      .post(createTeamUrl)
+      .post(teamsUrl)
       .set('authorization', `Bearer ${adminToken}`)
       .send(mocks.missingStadium);
     expect(res.status).toBe(422);
@@ -96,9 +96,27 @@ describe('E2E Team creation', () => {
 
   it('should throw an error when the manager name is not a valid string', async () => {
     const res = await request(app)
-      .post(createTeamUrl)
+      .post(teamsUrl)
       .set('authorization', `Bearer ${adminToken}`)
       .send(mocks.invalidManagerName);
     expect(res.status).toBe(422);
+  });
+});
+
+describe('E2E Fetch all teams', () => {
+  it('should throw an error when a token is not present in the request header', async () => {
+    const res = await request(app).get(teamsUrl);
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe('Unauthorized user, please login');
+  });
+
+  it('should fetch all teams', async () => {
+    const res = await request(app)
+      .get(teamsUrl)
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBeGreaterThan(0);
   });
 });
