@@ -31,4 +31,11 @@ router.patch(
   actions.update,
 );
 
+router.get(
+  '/:teamId',
+  validateRequest(objectIdSchema, 'params'),
+  checkTokenValidity,
+  actions.find,
+);
+
 export default router;
