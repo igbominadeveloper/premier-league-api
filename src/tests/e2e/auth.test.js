@@ -16,8 +16,8 @@ afterAll(async done => {
   done();
 });
 
-describe('User registration', () => {
-  it('should create a user successfully when valid input are supplied', async () => {
+describe('E2E User registration', () => {
+  it('should create a user successfully when valid inputs are supplied', async () => {
     const res = await request(app)
       .post(signupUrl)
       .send(mocks.mockUser);
@@ -67,8 +67,8 @@ describe('User registration', () => {
   });
 });
 
-describe('User Login', () => {
-  it('should login a user successfully when valid input are supplied', async () => {
+describe('E2E User Login', () => {
+  it('should login a user successfully when valid inputs are supplied', async () => {
     const res = await request(app)
       .post(loginUrl)
       .send(mocks.mockUser);

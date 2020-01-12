@@ -34,10 +34,7 @@ describe('Unit tests for team model', () => {
     const teamCount = await Team.countDocuments();
 
     expect(teamCount).toEqual(2);
-    expect(newTeam.name).toEqual(mockTeam1.name);
-    expect(newTeam.stadium).toEqual(mockTeam1.stadium);
-    expect(newTeam.manager).toEqual(mockTeam1.manager);
-    expect(newTeam.capacity).toEqual(mockTeam1.capacity);
+    expect(newTeam.manager).toEqual(mockTeam1.manager.toLowerCase());
   });
 
   it('Should retrieve teams from the database', async () => {
@@ -48,9 +45,9 @@ describe('Unit tests for team model', () => {
   });
 
   it('Should update a team in the database', async () => {
-    await Team.updateOne({ _id: mockTeam1._id }, { capacity: 90000 });
+    await Team.updateOne({ _id: mockTeam1._id }, { manager: 'George Weah' });
     const updatedTeam = await Team.findById(mockTeam1._id);
-    expect(updatedTeam.capacity).toEqual(90000);
+    expect(updatedTeam.manager).toEqual('george weah');
   });
 
   it('Should delete a team from the database', async () => {
