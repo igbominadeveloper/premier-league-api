@@ -9,13 +9,11 @@ dotenv.config();
 /**
  * Check User duplication before signup
  *
- * @param {String} email
- * @param {String} fullName
+ * @param {Object} keys
  * @returns {Boolean} true if record exists
  * @returns {Boolean} false if record does not exist
  */
-export const checkDuplicateUser = (email, fullName) =>
-  User.findOne({ email, fullName });
+export const checkIfUserExists = keys => User.findOne({ ...keys });
 
 /**
  * custom error response function
@@ -69,6 +67,17 @@ export const serverError = (res, error) =>
  */
 export const hashPassword = (password, salt = 10) =>
   bcrypt.hash(password, salt);
+
+/**
+ * Password Compare
+ *
+ * @export
+ * @param {string} password
+ * @param {string} existingUserPassword
+ * @returns {string} hash
+ */
+export const comparePassword = (password, existingUserPassword) =>
+  bcrypt.compareSync(password, existingUserPassword);
 
 /**
  * Generate JWT Token for authenticated users
