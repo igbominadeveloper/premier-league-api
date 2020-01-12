@@ -14,7 +14,6 @@ const teamSchema = new Schema(
     stadium: {
       type: String,
       required: true,
-      unique: true,
       lowercase: true,
     },
     manager: {

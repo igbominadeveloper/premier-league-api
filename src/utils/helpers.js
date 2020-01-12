@@ -99,10 +99,13 @@ export const generateToken = (payload, expiresIn = '30days') =>
  * @param {String} name
  * @param {String} manager
  */
-export const checkIfTeamExists = async (name, manager) =>
-  Team.find()
-    .or({ name: name.toLowerCase() })
-    .or({ manager: manager.toLowerCase() });
+export const checkIfTeamExists = async fields => {
+  const team = Team.find();
+  Object.keys(fields).forEach(field =>
+    team.or({ [field]: fields[field].toLowerCase() }),
+  );
+  return team;
+};
 
 /**
  *

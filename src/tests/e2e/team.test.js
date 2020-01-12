@@ -120,3 +120,90 @@ describe('E2E Fetch all teams', () => {
     expect(res.body.data.length).toBeGreaterThan(0);
   });
 });
+
+describe('E2E Team Update', () => {
+  let team;
+  const updateBody = {
+    name: 'Arsenal Ladies FC',
+    stadium: 'Emirates Mini Stadium',
+    manager: 'Nigel Pearson',
+  };
+
+  it('should throw an error when a token is not present in the request header', async () => {
+    team = await Team.findOne();
+    const res = await request(app)
+      .patch(`${teamsUrl}/${team._id}`)
+      .send(updateBody);
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe('Unauthorized user, please login');
+  });
+
+  it('should throw an error when the user making the request does not have admin rights', async () => {
+    const res = await request(app)
+      .patch(`${teamsUrl}/${team._id}`)
+      .set('authorization', `Bearer ${userToken}`)
+      .send(updateBody);
+    expect(res.status).toBe(403);
+  });
+
+  it('should update a team successfully when valid inputs are supplied', async () => {
+    const res = await request(app)
+      .patch(`${teamsUrl}/${team._id}`)
+      .set('authorization', `Bearer ${adminToken}`)
+      .send(updateBody);
+    expect(res.status).toBe(200);
+    expect(Object.keys(res.body.data).includes('name')).toBeTruthy();
+    expect(Object.keys(res.body.data).includes('stadium')).toBeTruthy();
+    expect(Object.keys(res.body.data).includes('manager')).toBeTruthy();
+  });
+
+  it('should throw an error when the user tries passing an empty string in the name field', async () => {
+    const res = await request(app)
+      .patch(`${teamsUrl}/${team._id}`)
+      .set('authorization', `Bearer ${adminToken}`)
+      .send({ ...updateBody, name: '' });
+
+    expect(res.status).toBe(422);
+    expect(
+      res.body.error.includes('name is not allowed to be empty'),
+    ).toBeTruthy();
+  });
+
+  it('should throw an error when the stadium field is an empty string', async () => {
+    const res = await request(app)
+      .patch(`${teamsUrl}/${team._id}`)
+      .set('authorization', `Bearer ${adminToken}`)
+      .send({ ...updateBody, stadium: '' });
+    expect(res.status).toBe(422);
+    expect(
+      res.body.error.includes('stadium is not allowed to be empty'),
+    ).toBeTruthy();
+  });
+
+  it('should throw an error when the manager field is an empty string', async () => {
+    const res = await request(app)
+      .patch(`${teamsUrl}/${team._id}`)
+      .set('authorization', `Bearer ${adminToken}`)
+      .send({ ...updateBody, manager: '' });
+    expect(res.status).toBe(422);
+    expect(
+      res.body.error.includes('manager is not allowed to be empty'),
+    ).toBeTruthy();
+  });
+
+  it('should throw an error when the manager name is not a valid string', async () => {
+    const res = await request(app)
+      .patch(`${teamsUrl}/${team._id}`)
+      .set('authorization', `Bearer ${adminToken}`)
+      .send(mocks.invalidManagerName);
+    expect(res.status).toBe(422);
+  });
+
+  it('should throw an error when the teamId passed is not a valid MongoDB ObjectId', async () => {
+    const res = await request(app)
+      .patch(`${teamsUrl}/p-=872---`)
+      .set('authorization', `Bearer ${adminToken}`)
+      .send(updateBody);
+    expect(res.status).toBe(422);
+  });
+});

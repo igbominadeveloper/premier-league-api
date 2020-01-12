@@ -39,14 +39,16 @@ app.all('*', (req, res) =>
 const port = process.env.PORT || 5000;
 
 // finally, let's start our server...
-dbconnect().then(async () => {
-  if (!module.parent) {
-    app.listen(port, () => {
-      console.log(
-        `Server running on ${process.env.NODE_ENV} environment, on port ${port}`,
-      );
-    });
-  }
-});
+dbconnect()
+  .then(async () => {
+    if (!module.parent) {
+      app.listen(port, () => {
+        console.log(
+          `Server running on ${process.env.NODE_ENV} environment, on port ${port}`,
+        );
+      });
+    }
+  })
+  .catch(error => console.log(error.message));
 
 export default app;
