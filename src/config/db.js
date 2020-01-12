@@ -15,7 +15,7 @@ const dbUrl = NODE_ENV === 'test' ? MONGODB_TEST_URL : MONGODB_URL;
 
 connection.on('connected', async () => {
   await console.log(
-    connected('Mongoose default connection is open to ', MONGODB_URL),
+    connected('Mongoose default connection is open to ', dbUrl),
   );
 });
 

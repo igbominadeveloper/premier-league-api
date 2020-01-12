@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
-import session from 'express-session';
 
 import router from './routes';
 import dbconnect from './config/db';
@@ -13,17 +12,6 @@ app.use(cors());
 
 // enable use of dotenv config file.
 dotenv.config();
-
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: true,
-    saveUninitialized: true,
-    cookie: {
-      secure: 'auto',
-    },
-  }),
-);
 
 // enable morgan logs only in development environment
 if (process.env.NODE_ENV === 'development') {

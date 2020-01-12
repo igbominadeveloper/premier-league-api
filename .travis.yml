@@ -11,8 +11,9 @@ services:
 scripts: 
   - npm run test
 
-#before_script:
-# - psql -c 'create database ah_zinnia;' -U postgres
-
+before_script:
+  - sleep 15
+  - mongo mydb_test --eval 'db.createUser({user:"travis",pwd:"test",roles:["readWrite"]});'
+  
 after_success:
   - coveralls < coverage/lcov.info
