@@ -38,4 +38,12 @@ router.get(
   actions.find,
 );
 
+router.delete(
+  '/:teamId',
+  validateRequest(objectIdSchema, 'params'),
+  checkTokenValidity,
+  verifyAdminUser,
+  actions.deleteOne,
+);
+
 export default router;
