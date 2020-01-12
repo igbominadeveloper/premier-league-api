@@ -92,3 +92,23 @@ export const find = async (req, res) => {
     return helpers.serverError(res, error.message);
   }
 };
+
+export const deleteOne = async (req, res) => {
+  const { teamId } = req.params;
+
+  try {
+    const team = await Team.findOne({ _id: teamId });
+    if (!team) {
+      return helpers.errorResponse(res, 404, 'This team does not exist');
+    }
+    const deletedTeam = await Team.findByIdAndDelete({ _id: teamId });
+    if (deletedTeam) {
+      return helpers.successResponse(res, 200, 'Team Deleted');
+    }
+    /* istanbul ignore next */
+    throw Error('What could ever happen here anyways?');
+  } catch (error) {
+    /* istanbul ignore next */
+    return helpers.serverError(res, error.message);
+  }
+};

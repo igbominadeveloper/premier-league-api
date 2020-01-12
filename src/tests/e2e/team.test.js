@@ -244,3 +244,50 @@ describe('E2E Fetch a single team', () => {
     expect(res.status).toBe(422);
   });
 });
+
+describe('E2E Delete a team', () => {
+  let team;
+  it('should throw an error when a token is not present in the request header', async () => {
+    team = await Team.findOne();
+    const res = await request(app).delete(`${teamsUrl}/${team._id}`);
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe('Unauthorized user, please login');
+  });
+
+  it('should delete a team successfully', async () => {
+    const res = await request(app)
+      .delete(`${teamsUrl}/${team._id}`)
+      .set('authorization', `Bearer ${adminToken}`);
+
+    console.log(res.body);
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe('Team Deleted');
+  });
+
+  it('should return a 403 response if the user does not have admin privileges', async () => {
+    const res = await request(app)
+      .delete(`${teamsUrl}/${team._id}`)
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('should return a 404 response when the team cannot be found', async () => {
+    const res = await request(app)
+      .delete(`${teamsUrl}/5e1b70de48bd99411c09389e`)
+      .set('authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe('This team does not exist');
+  });
+
+  it('should return a 422 response when the teamId passed is not a valid mongodb objectId', async () => {
+    const res = await request(app)
+      .delete(`${teamsUrl}/5e1b70de48bd99411c09389e---`)
+      .set('authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(422);
+  });
+});
