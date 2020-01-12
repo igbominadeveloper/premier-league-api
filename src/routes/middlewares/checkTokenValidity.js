@@ -15,19 +15,19 @@ dotenv.config();
 export const checkTokenValidity = async (req, res, next) => {
   let token = req.headers.authorization || req.headers['x-access-token'];
 
-  if (!token) {
+  if (!token || !token.length > 0) {
     return helpers.errorResponse(res, 401, 'Unauthorized user, please login');
   }
 
   token = token.split(' ')[1];
 
-  const verifiedToken = await helpers.verifyToken(token);
-
-  if (!verifiedToken) {
-    return helpers.errorResponse(res, 401, 'Unauthorized user, please login');
-  }
-
   try {
+    const verifiedToken = await helpers.verifyToken(token);
+
+    if (!verifiedToken) {
+      return helpers.errorResponse(res, 401, 'Unauthorized user, please login');
+    }
+
     const existingUser = await helpers.checkIfUserExists({
       _id: verifiedToken.id,
     });
@@ -43,6 +43,6 @@ export const checkTokenValidity = async (req, res, next) => {
     req.user = existingUser;
     next();
   } catch (error) {
-    return errorResponse(res, 400, error.message);
+    return helpers.errorResponse(res, 400, error.message);
   }
 };
