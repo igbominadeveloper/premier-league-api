@@ -77,3 +77,18 @@ export const update = async (req, res) => {
     return helpers.serverError(res, error.message);
   }
 };
+
+export const find = async (req, res) => {
+  const { teamId } = req.params;
+
+  try {
+    const team = await Team.findOne({ _id: teamId });
+    if (!team) {
+      return helpers.errorResponse(res, 404, 'This team does not exist');
+    }
+    return helpers.successResponse(res, 200, 'Team found', team);
+  } catch (error) {
+    /* istanbul ignore next */
+    return helpers.serverError(res, error.message);
+  }
+};

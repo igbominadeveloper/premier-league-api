@@ -207,3 +207,40 @@ describe('E2E Team Update', () => {
     expect(res.status).toBe(422);
   });
 });
+
+describe('E2E Fetch a single team', () => {
+  let team;
+  it('should throw an error when a token is not present in the request header', async () => {
+    team = await Team.findOne();
+    const res = await request(app).get(`${teamsUrl}/${team._id}`);
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe('Unauthorized user, please login');
+  });
+
+  it('should fetch a team successfully', async () => {
+    const res = await request(app)
+      .get(`${teamsUrl}/${team._id}`)
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.name).toBe(team.name);
+  });
+
+  it('should return a 404 response when the team cannot be found', async () => {
+    const res = await request(app)
+      .get(`${teamsUrl}/5e1b70de48bd99411c09389e`)
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe('This team does not exist');
+  });
+
+  it('should return a 422 response when the teamId passed is not a valid mongodb objectId', async () => {
+    const res = await request(app)
+      .get(`${teamsUrl}/5e1b70de48bd99411c09389e---`)
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(422);
+  });
+});
