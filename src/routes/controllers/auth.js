@@ -6,7 +6,10 @@ export const signup = async (req, res) => {
   const { email, password, fullName } = req.body;
 
   try {
-    const existingAccount = await helpers.checkDuplicateUser(email, fullName);
+    const existingAccount = await helpers.checkIfUserExists({
+      email,
+      fullName,
+    });
     if (existingAccount) {
       return helpers.errorResponse(
         res,
@@ -31,6 +34,47 @@ export const signup = async (req, res) => {
     return helpers.successResponse(res, 201, 'Account created successfully', {
       token,
       ...{ email: user.email, fullName: user.fullName },
+    });
+  } catch (error) {
+    /* istanbul ignore next */
+    return helpers.serverError(res, error.message);
+  }
+};
+
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const existingAccount = await helpers.checkIfUserExists({ email });
+    if (!existingAccount) {
+      return helpers.errorResponse(
+        res,
+        400,
+        'Invalid credentials, please login again',
+      );
+    }
+    const passwordCheckedOut = await helpers.comparePassword(
+      password,
+      existingAccount.password,
+    );
+
+    if (!passwordCheckedOut) {
+      return helpers.errorResponse(
+        res,
+        400,
+        'Invalid credentials, please login again',
+      );
+    }
+
+    const tokenPayload = {
+      id: existingAccount.id,
+      email: existingAccount.email,
+    };
+    const token = helpers.generateToken(tokenPayload);
+
+    return helpers.successResponse(res, 200, 'Login successful', {
+      token,
+      ...{ email: existingAccount.email, fullName: existingAccount.fullName },
     });
   } catch (error) {
     /* istanbul ignore next */

@@ -28,7 +28,6 @@ export const signupSchema = Joi.object()
     fullName: fullNameSchema,
     email,
     password: Joi.string()
-      .alphanum()
       .min(4)
       .required(),
     role: roleSchema,
@@ -38,6 +37,6 @@ export const signupSchema = Joi.object()
 export const loginSchema = Joi.object()
   .keys({
     email,
-    password: stringSchema.alphanum().required(),
+    password: stringSchema.required(),
   })
   .options({ ...options });

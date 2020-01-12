@@ -1,11 +1,12 @@
 import { Router } from 'express';
 
-import { signup } from './controllers/auth';
+import { signup, login } from './controllers/auth';
 import validateRequest from './middlewares/validate-input';
-import { signupSchema } from './middlewares/joi-schema';
+import { signupSchema, loginSchema } from './middlewares/joi-schema';
 
 const router = Router();
 
 router.post('/signup', validateRequest(signupSchema, 'body'), signup);
+router.post('/login', validateRequest(loginSchema, 'body'), login);
 
 export default router;
