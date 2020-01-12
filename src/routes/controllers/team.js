@@ -5,7 +5,7 @@ export const create = async (req, res) => {
   const { name, manager } = req.body;
 
   try {
-    const existingTeam = await helpers.checkIfTeamExists(name, manager);
+    const existingTeam = await helpers.checkIfTeamExists({ name, manager });
 
     if (existingTeam.length) {
       return helpers.errorResponse(res, 409, 'This Team exists already');
@@ -28,6 +28,50 @@ export const all = async (req, res) => {
   try {
     const allTeams = await Team.find();
     return helpers.successResponse(res, 200, 'Got all teams', allTeams);
+  } catch (error) {
+    /* istanbul ignore next */
+    return helpers.serverError(res, error.message);
+  }
+};
+
+export const update = async (req, res) => {
+  // This fields are not compulsory to be there but
+  // they better not be empty strings or unmatched types
+  const { name, manager } = req.body;
+  const { teamId } = req.params;
+
+  try {
+    const teamToUpdate = await Team.findById({ _id: teamId });
+    if (!teamToUpdate) {
+      return helpers.errorResponse(res, 404, 'This team does not exist');
+    }
+
+    const existingTeams = await helpers.checkIfTeamExists({
+      name,
+      manager,
+    });
+
+    const matchFound = existingTeams.find(team => String(team._id) === teamId);
+
+    if (existingTeams.length && !matchFound) {
+      return helpers.errorResponse(
+        res,
+        409,
+        'A team with these details exists already',
+      );
+    }
+
+    const updatedTeam = await Team.findOneAndUpdate(
+      { _id: teamId },
+      { ...req.body },
+      { new: true },
+    );
+
+    return helpers.successResponse(res, 200, 'Team updated successfully', {
+      name: updatedTeam.name,
+      stadium: updatedTeam.stadium,
+      manager: updatedTeam.manager,
+    });
   } catch (error) {
     /* istanbul ignore next */
     return helpers.serverError(res, error.message);

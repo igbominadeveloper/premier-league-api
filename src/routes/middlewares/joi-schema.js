@@ -41,7 +41,7 @@ export const loginSchema = Joi.object()
   })
   .options({ ...options });
 
-export const teamSchema = Joi.object()
+export const createTeamSchema = Joi.object()
   .keys({
     name: stringSchema.min(4).required(),
     stadium: stringSchema.min(4).required(),
@@ -49,5 +49,24 @@ export const teamSchema = Joi.object()
       .regex(/^[A-Za-z ]+$/)
       .min(4)
       .required(),
+  })
+  .options({ ...options });
+
+export const updateTeamSchema = Joi.object()
+  .keys({
+    name: stringSchema.min(4),
+    stadium: stringSchema.min(4),
+    manager: stringSchema.regex(/^[A-Za-z ]+$/).min(4),
+  })
+  .options({ ...options });
+
+export const objectIdSchema = Joi.object()
+  .keys({
+    teamId: Joi.string()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .required()
+      .error(() => ({
+        message: 'ID must be a valid mongodb objectId.',
+      })),
   })
   .options({ ...options });
