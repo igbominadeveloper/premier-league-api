@@ -3,15 +3,16 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 import User from '../db/models/User';
+import Team from '../db/models/Team';
 
 dotenv.config();
 
 /**
- * Check User duplication before signup
+ * Check User account existence
  *
  * @param {Object} keys
- * @returns {Boolean} true if record exists
- * @returns {Boolean} false if record does not exist
+ * @returns {Object} if record exists
+ * @returns {null} if record does not exist
  */
 export const checkIfUserExists = keys => User.findOne({ ...keys });
 
@@ -91,3 +92,24 @@ export const generateToken = (payload, expiresIn = '30days') =>
   jwt.sign(payload, process.env.SECRET_KEY, {
     expiresIn,
   });
+
+/**
+ * Check if Team exists
+ *
+ * @param {String} name
+ * @param {String} stadium
+ * @param {String} manager
+ */
+export const checkIfTeamExists = (name, stadium, manager) =>
+  Team.find({ name: name.toLowerCase() }).or([
+    { stadium: stadium.toLowerCase() },
+    { manager: manager.toLowerCase() },
+  ]);
+
+/**
+ *
+ * @param {String} token
+ * @returns {Boolean} true if token is valid
+ * @returns {Boolean} false if token is invalid
+ */
+export const verifyToken = token => jwt.verify(token, process.env.SECRET_KEY);

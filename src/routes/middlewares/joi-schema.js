@@ -40,3 +40,14 @@ export const loginSchema = Joi.object()
     password: stringSchema.required(),
   })
   .options({ ...options });
+
+export const teamSchema = Joi.object()
+  .keys({
+    name: stringSchema.min(4).required(),
+    stadium: stringSchema.min(4).required(),
+    manager: stringSchema
+      .regex(/^[A-Za-z ]+$/)
+      .min(4)
+      .required(),
+  })
+  .options({ ...options });
