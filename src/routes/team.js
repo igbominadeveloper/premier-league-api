@@ -5,7 +5,7 @@ import validateRequest from './middlewares/validate-input';
 import {
   createTeamSchema,
   updateTeamSchema,
-  objectIdSchema,
+  teamIdSchema,
 } from './middlewares/joi-schema';
 import { checkTokenValidity } from './middlewares/checkTokenValidity';
 import verifyAdminUser from './middlewares/checkIfUserIsAdmin';
@@ -25,7 +25,7 @@ router.get('/', checkTokenValidity, actions.all);
 router.patch(
   '/:teamId',
   validateRequest(updateTeamSchema, 'body'),
-  validateRequest(objectIdSchema, 'params'),
+  validateRequest(teamIdSchema, 'params'),
   checkTokenValidity,
   verifyAdminUser,
   actions.update,
@@ -33,14 +33,14 @@ router.patch(
 
 router.get(
   '/:teamId',
-  validateRequest(objectIdSchema, 'params'),
+  validateRequest(teamIdSchema, 'params'),
   checkTokenValidity,
   actions.find,
 );
 
 router.delete(
   '/:teamId',
-  validateRequest(objectIdSchema, 'params'),
+  validateRequest(teamIdSchema, 'params'),
   checkTokenValidity,
   verifyAdminUser,
   actions.deleteOne,

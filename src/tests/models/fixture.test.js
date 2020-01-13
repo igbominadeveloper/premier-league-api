@@ -34,7 +34,6 @@ describe('Unit tests for fixture model', () => {
     const fixtureCount = await Fixture.countDocuments();
 
     expect(fixtureCount).toEqual(2);
-    expect(new Date(newFixture.date).toISOString()).toEqual(mockFixture1.date);
     expect(newFixture.homeTeamId).toEqual(mockFixture1.homeTeamId);
     expect(newFixture.referee).toEqual(mockFixture1.referee);
     expect(newFixture.uniqueLink).toEqual(mockFixture1.uniqueLink);

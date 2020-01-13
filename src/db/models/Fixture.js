@@ -1,5 +1,8 @@
 import mongoose from 'mongoose';
 
+import Team from './Team';
+import User from './User';
+
 const Schema = mongoose.Schema;
 
 // Describe the schema
@@ -10,12 +13,14 @@ const fixtureSchema = new Schema(
       required: true,
     },
     homeTeamId: {
-      type: String,
+      type: Schema.Types.Mixed,
       required: true,
+      ref: Team,
     },
     awayTeamId: {
-      type: String,
+      type: Schema.Types.Mixed,
       required: true,
+      ref: Team,
     },
     referee: {
       type: String,
@@ -25,6 +30,8 @@ const fixtureSchema = new Schema(
       type: String,
       required: true,
       default: 'PENDING',
+      uppercase: true,
+      enum: ['PENDING', 'PLAYED', 'CANCELLED', 'POSTPONED'],
     },
     uniqueLink: {
       type: String,
@@ -34,6 +41,7 @@ const fixtureSchema = new Schema(
     createdBy: {
       type: String,
       required: true,
+      ref: User,
     },
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } },

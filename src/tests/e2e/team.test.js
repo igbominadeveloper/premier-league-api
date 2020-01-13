@@ -260,8 +260,6 @@ describe('E2E Delete a team', () => {
       .delete(`${teamsUrl}/${team._id}`)
       .set('authorization', `Bearer ${adminToken}`);
 
-    console.log(res.body);
-
     expect(res.status).toBe(200);
     expect(res.body.message).toBe('Team Deleted');
   });
