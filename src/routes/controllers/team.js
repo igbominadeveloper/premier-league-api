@@ -14,6 +14,7 @@ export const create = async (req, res) => {
     const newTeam = await Team.create(req.body);
 
     return helpers.successResponse(res, 201, 'Team created successfully', {
+      id: newTeam._id,
       name: newTeam.name,
       stadium: newTeam.stadium,
       manager: newTeam.manager,

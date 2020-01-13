@@ -23,6 +23,52 @@ const fullNameSchema = stringSchema
   .min(4)
   .required();
 
+const objectIdSchema = Joi.string()
+  .regex(/^[a-fA-F0-9]{24}$/)
+  .error(errors => {
+    const [error] = errors;
+    const { type, context } = error;
+    if (type === 'string.regex.base') {
+      return {
+        message: `${context.key} must be a valid mongodb objectId`,
+      };
+    }
+    if (type === 'any.required') {
+      return {
+        message: `${context.key} is required`,
+      };
+    }
+  });
+
+const alphabetsOnlySchema = Joi.string()
+  .regex(/^[A-Za-z ]+$/)
+  .error(errors => {
+    const [error] = errors;
+    const { type, context } = error;
+    if (type === 'string.regex.base') {
+      return {
+        message: `${context.key} can only contain alphabets and whitespace between words`,
+      };
+    }
+    if (type === 'any.required') {
+      return {
+        message: `${context.key} is required`,
+      };
+    }
+    if (type === 'any.empty') {
+      return {
+        message: `${context.key} is not allowed to be empty`,
+      };
+    }
+
+    if (type === 'string.min') {
+      return {
+        message: `${context.key} value cannot be less than ${context.limit} `,
+      };
+    }
+  });
+
+// Authentication schemas
 export const signupSchema = Joi.object()
   .keys({
     fullName: fullNameSchema,
@@ -41,14 +87,12 @@ export const loginSchema = Joi.object()
   })
   .options({ ...options });
 
+// Teams schemas
 export const createTeamSchema = Joi.object()
   .keys({
     name: stringSchema.min(4).required(),
     stadium: stringSchema.min(4).required(),
-    manager: stringSchema
-      .regex(/^[A-Za-z ]+$/)
-      .min(4)
-      .required(),
+    manager: alphabetsOnlySchema.min(4).required(),
   })
   .options({ ...options });
 
@@ -56,17 +100,50 @@ export const updateTeamSchema = Joi.object()
   .keys({
     name: stringSchema.min(4),
     stadium: stringSchema.min(4),
-    manager: stringSchema.regex(/^[A-Za-z ]+$/).min(4),
+    manager: alphabetsOnlySchema.min(4),
   })
   .options({ ...options });
 
-export const objectIdSchema = Joi.object()
+export const teamIdSchema = Joi.object()
   .keys({
-    teamId: Joi.string()
-      .regex(/^[a-fA-F0-9]{24}$/)
+    teamId: objectIdSchema.required(),
+  })
+  .options({ ...options });
+
+// Fixtures
+export const createFixtureSchema = Joi.object()
+  .keys({
+    date: Joi.date()
+      .min('now')
       .required()
-      .error(() => ({
-        message: 'ID must be a valid mongodb objectId.',
-      })),
+      .error(errors => {
+        const [error] = errors;
+        const { type, context } = error;
+        if (type === 'any.required') {
+          return {
+            message: `${context.key} is required`,
+          };
+        }
+        if (type === 'any.empty') {
+          return {
+            message: `${context.key} is required`,
+          };
+        }
+
+        if (type === 'date.min') {
+          return {
+            message: `${context.key} must be later than or equal to today`,
+          };
+        }
+        if (type === 'date.base') {
+          return {
+            message: `${context.key} must be later than or equal to today`,
+          };
+        }
+        return `${context.key} must be a valid date type and must be greater than or equal to today`;
+      }),
+    homeTeamId: objectIdSchema.required(),
+    awayTeamId: objectIdSchema.required(),
+    referee: alphabetsOnlySchema.min(4).required(),
   })
   .options({ ...options });

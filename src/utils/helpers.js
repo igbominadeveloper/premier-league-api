@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 
 import User from '../db/models/User';
 import Team from '../db/models/Team';
+import Fixture from '../db/models/Fixture';
 
 dotenv.config();
 
@@ -96,8 +97,7 @@ export const generateToken = (payload, expiresIn = '30days') =>
 /**
  * Check if Team exists
  *
- * @param {String} name
- * @param {String} manager
+ * @param {Object} fields name, stadium, manager, id
  */
 export const checkIfTeamExists = async fields => {
   const team = Team.find();
@@ -114,3 +114,14 @@ export const checkIfTeamExists = async fields => {
  * @returns {Boolean} false if token is invalid
  */
 export const verifyToken = token => jwt.verify(token, process.env.SECRET_KEY);
+
+/**
+ * Check Fixture existence
+ *
+ * @param {Object} keys
+ * @returns {Object} if record exists
+ * @returns {null} if record does not exist
+ */
+export const checkIfFixtureExists = keys => Fixture.findOne({ ...keys });
+
+export const stripAllSpaces = words => words.replace(/\s/gi, '');
