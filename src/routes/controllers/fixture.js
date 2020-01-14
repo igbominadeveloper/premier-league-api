@@ -17,8 +17,14 @@ export const create = async (req, res) => {
       return helpers.errorResponse(res, 409, 'This Fixture exists already');
     }
 
-    const [homeTeam] = await helpers.checkIfTeamExists({ _id: homeTeamId });
-    const [awayTeam] = await helpers.checkIfTeamExists({ _id: awayTeamId });
+    const homeTeam = await helpers.checkIfTeamExists({
+      _id: homeTeamId,
+    });
+
+    const awayTeam = await helpers.checkIfTeamExists({
+      _id: awayTeamId,
+    });
+
     if (!homeTeam) {
       return helpers.errorResponse(
         res,

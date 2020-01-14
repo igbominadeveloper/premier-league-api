@@ -3,8 +3,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 import User from '../db/models/User';
-import Team from '../db/models/Team';
 import Fixture from '../db/models/Fixture';
+import Team from '../db/models/Team';
 
 dotenv.config();
 
@@ -95,16 +95,17 @@ export const generateToken = (payload, expiresIn = '30days') =>
   });
 
 /**
- * Check if Team exists
+ * Check if Matching record exists
  *
- * @param {Object} fields name, stadium, manager, id
+ * @param {Object} fields model fields
+ * @param {Model} MongooseModel to user to search with
  */
-export const checkIfTeamExists = async fields => {
-  const team = Team.find();
+export const checkIfAnyMatchingRecordExists = async (Model, fields) => {
+  const query = Model.find();
   Object.keys(fields).forEach(field =>
-    team.or({ [field]: fields[field].toLowerCase() }),
+    query.or({ [field]: new RegExp(fields[field], 'ig') }),
   );
-  return team;
+  return query;
 };
 
 /**
@@ -130,3 +131,12 @@ export const checkIfFixtureExists = keys => Fixture.findOne({ ...keys });
  * @param {String} words
  */
 export const stripAllSpaces = words => words.replace(/\s/gi, '');
+
+/**
+ * Check Team existence
+ *
+ * @param {Object} keys
+ * @returns {Object} if record exists
+ * @returns {null} if record does not exist
+ */
+export const checkIfTeamExists = keys => Team.findOne({ ...keys });

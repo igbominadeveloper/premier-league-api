@@ -165,3 +165,9 @@ export const updateFixtureSchema = Joi.object()
       .valid(['PENDING', 'PLAYED', 'POSTPONED', 'CANCELLED']),
   })
   .options({ ...options });
+
+export const searchSchema = Joi.object()
+  .keys({
+    q: alphabetsOnlySchema.required(),
+  })
+  .options({ ...options });
