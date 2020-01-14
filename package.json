@@ -9,7 +9,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
-      "pre-push": "npm run test:coverage"
+      "pre-push": "npm test"
     }
   },
   "lint-staged": {
@@ -32,7 +32,6 @@
     "check-staged": "lint-staged",
     "prettier": "prettier --write '**/*.{js,jsx}'",
     "test": "NODE_ENV=test jest",
-    "test:coverage": "NODE_ENV=test jest --coverage",
     "test:watch": "NODE_ENV=test jest --watch",
     "build": "rm -rf build && babel src -d build",
     "lint": "eslint src --fix"

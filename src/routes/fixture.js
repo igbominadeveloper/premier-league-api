@@ -42,4 +42,13 @@ router.patch(
   actions.update,
 );
 
+router.delete(
+  '/:fixtureId',
+  validateRequest(fixtureIdSchema, 'params'),
+  checkTokenValidity,
+  verifyAdminUser,
+  checkResourceOwner(Fixture, 'fixtureId'),
+  actions.deleteOne,
+);
+
 export default router;
