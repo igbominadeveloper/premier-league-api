@@ -138,3 +138,77 @@ describe('E2E Fixture creation', () => {
     );
   });
 });
+
+describe('E2E Fetch all fixtures', () => {
+  it('should throw an error when a token is not present in the request header', async () => {
+    const res = await request(app).get(fixturesUrl);
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe('Unauthorized user, please login');
+  });
+
+  it('should fetch all fixtures', async () => {
+    await Fixture.insertMany([
+      {
+        date: '1-22-2020',
+        homeTeamId: mockTeam1._id,
+        awayTeamId: mockTeam2._id,
+        referee: 'Phil Dowd',
+        date: '1-23-2021',
+        status: 'PLAYED',
+        createdBy: mocks.mockFixture1.createdBy,
+        uniqueLink: Math.random(),
+      },
+      {
+        date: '1-22-2021',
+        homeTeamId: mockTeam2._id,
+        awayTeamId: mockTeam1._id,
+        referee: 'Phil Dowd',
+        date: '1-23-2022',
+        status: 'POSTPONED',
+        createdBy: mocks.mockFixture1.createdBy,
+        uniqueLink: Math.random(),
+      },
+    ]);
+
+    const res = await request(app)
+      .get(fixturesUrl)
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBeGreaterThan(0);
+  });
+
+  it('should only return pending fixtures when the query is passed', async () => {
+    const res = await request(app)
+      .get(fixturesUrl)
+      .query({ status: 'pending' })
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBeGreaterThan(0);
+    expect(res.body.data[0].status).toBe('PENDING');
+  });
+
+  it('should only return played fixtures when the query is passed', async () => {
+    const res = await request(app)
+      .get(fixturesUrl)
+      .query({ status: 'played' })
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBeGreaterThan(0);
+    expect(res.body.data[0].status).toBe('PLAYED');
+  });
+
+  it('should only return postponed fixtures when the query is passed', async () => {
+    const res = await request(app)
+      .get(fixturesUrl)
+      .query({ status: 'postponed' })
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBeGreaterThan(0);
+    expect(res.body.data[0].status).toBe('POSTPONED');
+  });
+});
