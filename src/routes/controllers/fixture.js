@@ -111,3 +111,19 @@ export const update = async (req, res) => {
     return helpers.serverError(res, error.message);
   }
 };
+
+export const deleteOne = async (req, res) => {
+  const { fixtureId } = req.params;
+
+  try {
+    const deletedFixture = await Fixture.findByIdAndDelete({ _id: fixtureId });
+    if (deletedFixture) {
+      return helpers.successResponse(res, 200, 'Fixture Deleted');
+    }
+    /* istanbul ignore next */
+    throw Error('What could ever happen here anyways?');
+  } catch (error) {
+    /* istanbul ignore next */
+    return helpers.serverError(res, error.message);
+  }
+};

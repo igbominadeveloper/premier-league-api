@@ -256,9 +256,9 @@ describe('E2E Fetch a single fixture', () => {
   });
 });
 
+let newAdminToken;
+let fixture;
 describe('E2E Fixture Update', () => {
-  let fixture;
-  let newAdminToken;
   const updateBody = {
     date: '9-25-2022',
     referee: 'Joane Pipi',
@@ -277,7 +277,7 @@ describe('E2E Fixture Update', () => {
       },
     ]);
 
-    newAdminToken = generateToken({ id: newAdminUser[0]._id }, '5m');
+    newAdminToken = await generateToken({ id: newAdminUser[0]._id }, '5m');
 
     const res = await request(app)
       .patch(`${fixturesUrl}/${fixture._id}`)
@@ -344,5 +344,55 @@ describe('E2E Fixture Update', () => {
     expect(res.body.error[0]).toBe(
       'fixtureId must be a valid mongodb objectId',
     );
+  });
+});
+
+describe('E2E Delete a fixture', () => {
+  it('should throw an error when a token is not present in the request header', async () => {
+    const res = await request(app).delete(`${fixturesUrl}/${fixture._id}`);
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe('Unauthorized user, please login');
+  });
+
+  it('should throw an error when the user making the request is an admin but is not the creator of the resource', async () => {
+    const res = await request(app)
+      .delete(`${fixturesUrl}/${fixture._id}`)
+      .set('authorization', `Bearer ${newAdminToken}`);
+    expect(res.status).toBe(403);
+  });
+
+  it('should delete a fixture successfully', async () => {
+    const res = await request(app)
+      .delete(`${fixturesUrl}/${fixture._id}`)
+      .set('authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toBe('Fixture Deleted');
+  });
+
+  it('should return a 403 response if the user does not have admin privileges', async () => {
+    const res = await request(app)
+      .delete(`${fixturesUrl}/${fixture._id}`)
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('should return a 404 response when the team cannot be found', async () => {
+    const res = await request(app)
+      .delete(`${fixturesUrl}/5e1b70de48bd99411c09389e`)
+      .set('authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe('This resource does not exist');
+  });
+
+  it('should return a 422 response when the teamId passed is not a valid mongodb objectId', async () => {
+    const res = await request(app)
+      .delete(`${fixturesUrl}/5e1b70de48bd99411c09389e---`)
+      .set('authorization', `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(422);
   });
 });

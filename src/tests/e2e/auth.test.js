@@ -24,6 +24,7 @@ describe('E2E User registration', () => {
     const res = await request(app)
       .post(signupUrl)
       .send(mocks.mockUser);
+
     expect(res.status).toBe(201);
     expect(Object.keys(res.body.data).includes('token')).toBeTruthy();
     expect(res.body.data.token).not.toBe('');
