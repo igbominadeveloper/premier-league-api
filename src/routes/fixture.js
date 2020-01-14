@@ -2,7 +2,7 @@ import { Router } from 'express';
 
 import * as actions from './controllers/fixture';
 import validateRequest from './middlewares/validate-input';
-import { createFixtureSchema } from './middlewares/joi-schema';
+import { createFixtureSchema, fixtureIdSchema } from './middlewares/joi-schema';
 import { checkTokenValidity } from './middlewares/checkTokenValidity';
 import verifyAdminUser from './middlewares/checkIfUserIsAdmin';
 
@@ -17,5 +17,12 @@ router.post(
 );
 
 router.get('/', checkTokenValidity, actions.all);
+
+router.get(
+  '/:fixtureId',
+  validateRequest(fixtureIdSchema, 'params'),
+  checkTokenValidity,
+  actions.find,
+);
 
 export default router;

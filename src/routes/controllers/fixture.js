@@ -75,3 +75,18 @@ export const all = async (req, res) => {
     return helpers.serverError(res, error.message);
   }
 };
+
+export const find = async (req, res) => {
+  const { fixtureId } = req.params;
+
+  try {
+    const fixture = await helpers.checkIfFixtureExists({ _id: fixtureId });
+    if (!fixture) {
+      return helpers.errorResponse(res, 404, 'This fixture does not exist');
+    }
+    return helpers.successResponse(res, 200, 'Fixture found', fixture);
+  } catch (error) {
+    /* istanbul ignore next */
+    return helpers.serverError(res, error.message);
+  }
+};

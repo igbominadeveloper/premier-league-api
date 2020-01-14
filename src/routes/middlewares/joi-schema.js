@@ -147,3 +147,9 @@ export const createFixtureSchema = Joi.object()
     referee: alphabetsOnlySchema.min(4).required(),
   })
   .options({ ...options });
+
+export const fixtureIdSchema = Joi.object()
+  .keys({
+    fixtureId: objectIdSchema.required(),
+  })
+  .options({ ...options });

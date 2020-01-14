@@ -8,7 +8,10 @@ import User from '../../db/models/User';
 const signupUrl = '/api/v1/auth/signup';
 const loginUrl = '/api/v1/auth/login';
 
-beforeAll(async () => await User.deleteMany({}));
+beforeAll(async done => {
+  await User.deleteMany({});
+  done();
+});
 
 afterAll(async done => {
   await User.deleteMany({});

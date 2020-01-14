@@ -19,6 +19,9 @@ let userToken;
 let adminToken;
 
 beforeAll(async () => {
+  await User.deleteMany({});
+  await Team.deleteMany({});
+  await Fixture.deleteMany({});
   const users = await User.insertMany([mockAdmin, mockUser]);
   await Team.insertMany([mockTeam1, mockTeam2]);
   adminToken = await generateToken({ id: users[0]._id }, '5m');
@@ -210,5 +213,45 @@ describe('E2E Fetch all fixtures', () => {
     expect(res.status).toBe(200);
     expect(res.body.data.length).toBeGreaterThan(0);
     expect(res.body.data[0].status).toBe('POSTPONED');
+  });
+});
+
+describe('E2E Fetch a single fixture', () => {
+  let fixture;
+  it('should throw an error when a token is not present in the request header', async () => {
+    fixture = await Fixture.findOne();
+    const res = await request(app).get(`${fixturesUrl}/${fixture._id}`);
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe('Unauthorized user, please login');
+  });
+
+  it('should fetch a fixture successfully', async () => {
+    const res = await request(app)
+      .get(`${fixturesUrl}/${fixture._id}`)
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.referee).toBe(fixture.referee);
+  });
+
+  it('should return a 404 response when the fixture cannot be found', async () => {
+    const res = await request(app)
+      .get(`${fixturesUrl}/5e1b70de48bd99411c09389e`)
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe('This fixture does not exist');
+  });
+
+  it('should return a 422 response when the fixtureId passed is not a valid mongodb objectId', async () => {
+    const res = await request(app)
+      .get(`${fixturesUrl}/5e1b70de48bd99411c09389e---`)
+      .set('authorization', `Bearer ${userToken}`);
+
+    expect(res.status).toBe(422);
+    expect(res.body.error[0]).toBe(
+      'fixtureId must be a valid mongodb objectId',
+    );
   });
 });
