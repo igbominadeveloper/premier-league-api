@@ -16,6 +16,7 @@ export const checkTokenValidity = async (req, res, next) => {
   let token = req.headers.authorization || req.headers['x-access-token'];
 
   if (!token || !token.length > 0) {
+    console.log('no token set');
     return helpers.errorResponse(res, 401, 'Unauthorized user, please login');
   }
 
@@ -25,6 +26,7 @@ export const checkTokenValidity = async (req, res, next) => {
     const verifiedToken = await helpers.verifyToken(token);
 
     if (!verifiedToken) {
+      console.log('token verification failed');
       return helpers.errorResponse(res, 401, 'Unauthorized user, please login');
     }
 
@@ -33,6 +35,8 @@ export const checkTokenValidity = async (req, res, next) => {
     });
 
     if (!existingUser) {
+      console.log('no user found');
+
       return helpers.errorResponse(
         res,
         401,

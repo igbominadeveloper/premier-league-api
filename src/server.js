@@ -26,6 +26,12 @@ app.use(
 
 app.use(express.json());
 
+app.get('/', (req, res) =>
+  res.status(200).json({
+    message: 'Welcome to Mock premier league',
+  }),
+);
+
 // API routes
 app.use('/api/v1', router);
 

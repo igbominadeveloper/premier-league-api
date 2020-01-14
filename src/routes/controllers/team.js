@@ -5,7 +5,10 @@ export const create = async (req, res) => {
   const { name, manager } = req.body;
 
   try {
-    const existingTeam = await helpers.checkIfTeamExists({ name, manager });
+    const existingTeam = await helpers.checkIfAnyMatchingRecordExists(Team, {
+      name,
+      manager,
+    });
 
     if (existingTeam.length) {
       return helpers.errorResponse(res, 409, 'This Team exists already');
@@ -47,7 +50,7 @@ export const update = async (req, res) => {
       return helpers.errorResponse(res, 404, 'This team does not exist');
     }
 
-    const existingTeams = await helpers.checkIfTeamExists({
+    const existingTeams = await helpers.checkIfAnyMatchingRecordExists(Team, {
       name,
       manager,
     });

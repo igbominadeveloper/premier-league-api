@@ -17,8 +17,6 @@ let userToken;
 let adminToken;
 
 beforeAll(async () => {
-  console.log('I got here');
-
   await User.deleteMany({});
   await Team.deleteMany({});
   const users = await User.insertMany([mockAdmin, mockUser]);
@@ -135,7 +133,6 @@ describe('E2E Team Update', () => {
 
   it('should throw an error when a token is not present in the request header', async () => {
     team = await Team.findOne();
-    console.log(team, 'update team');
 
     const res = await request(app)
       .patch(`${teamsUrl}/${team._id}`)
@@ -218,7 +215,6 @@ describe('E2E Fetch a single team', () => {
   let team;
   it('should throw an error when a token is not present in the request header', async () => {
     team = await Team.findOne();
-    console.log(team, 'get one');
     const res = await request(app).get(`${teamsUrl}/${team._id}`);
 
     expect(res.status).toBe(401);
@@ -256,7 +252,6 @@ describe('E2E Delete a team', () => {
   let team;
   it('should throw an error when a token is not present in the request header', async () => {
     team = await Team.findOne();
-    console.log(team, 'delete');
 
     const res = await request(app).delete(`${teamsUrl}/${team._id}`);
 
