@@ -36,7 +36,7 @@ export const all = async (req, res) => {
 };
 
 export const update = async (req, res) => {
-  // This fields are not compulsory to be there but
+  // These fields are not compulsory to be there but
   // they better not be empty strings or unmatched types
   const { name, manager } = req.body;
   const { teamId } = req.params;

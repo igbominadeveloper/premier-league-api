@@ -90,3 +90,24 @@ export const find = async (req, res) => {
     return helpers.serverError(res, error.message);
   }
 };
+
+export const update = async (req, res) => {
+  const { fixtureId } = req.params;
+
+  try {
+    const updatedFixture = await Fixture.findOneAndUpdate(
+      { _id: fixtureId },
+      { ...req.body },
+      { new: true },
+    );
+
+    return helpers.successResponse(res, 200, 'Fixture updated successfully', {
+      name: updatedFixture.name,
+      referee: updatedFixture.referee,
+      date: updatedFixture.date,
+    });
+  } catch (error) {
+    /* istanbul ignore next */
+    return helpers.serverError(res, error.message);
+  }
+};
