@@ -17,7 +17,6 @@ let userToken;
 let adminToken;
 
 beforeAll(async () => {
-  await Team.deleteMany({});
   await User.deleteMany({});
   const users = await User.insertMany([mockAdmin, mockUser]);
   adminToken = await generateToken({ id: users[0]._id }, '5m');
@@ -25,8 +24,8 @@ beforeAll(async () => {
 });
 
 afterAll(async done => {
-  await Team.deleteMany({});
   await User.deleteMany({});
+  await Team.deleteMany({});
   await mongoose.connection.close();
   done();
 });

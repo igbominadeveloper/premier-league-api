@@ -124,4 +124,9 @@ export const verifyToken = token => jwt.verify(token, process.env.SECRET_KEY);
  */
 export const checkIfFixtureExists = keys => Fixture.findOne({ ...keys });
 
+/**
+ * strip all whitespaces from a word or words
+ *
+ * @param {String} words
+ */
 export const stripAllSpaces = words => words.replace(/\s/gi, '');
