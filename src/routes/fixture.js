@@ -16,4 +16,6 @@ router.post(
   actions.create,
 );
 
+router.get('/', checkTokenValidity, actions.all);
+
 export default router;

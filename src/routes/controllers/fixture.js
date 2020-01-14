@@ -60,3 +60,18 @@ export const create = async (req, res) => {
     return helpers.serverError(res, error.message);
   }
 };
+
+export const all = async (req, res) => {
+  const { status } = req.query;
+
+  try {
+    const fixtures = await Fixture.find(
+      status && {
+        status: status.toUpperCase(),
+      },
+    );
+    return helpers.successResponse(res, 200, 'Fetched all fixtures', fixtures);
+  } catch (error) {
+    return helpers.serverError(res, error.message);
+  }
+};

@@ -18,6 +18,7 @@ let adminToken;
 
 beforeAll(async () => {
   await Team.deleteMany({});
+  await User.deleteMany({});
   const users = await User.insertMany([mockAdmin, mockUser]);
   adminToken = await generateToken({ id: users[0]._id }, '5m');
   userToken = await generateToken({ id: users[1]._id }, '5m');
