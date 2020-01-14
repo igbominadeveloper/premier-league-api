@@ -111,37 +111,39 @@ export const teamIdSchema = Joi.object()
   .options({ ...options });
 
 // Fixtures
+
+const fixtureDateSchema = Joi.date()
+  .min('now')
+  .error(errors => {
+    const [error] = errors;
+    const { type, context } = error;
+    if (type === 'any.required') {
+      return {
+        message: `${context.key} is required`,
+      };
+    }
+    if (type === 'any.empty') {
+      return {
+        message: `${context.key} is required`,
+      };
+    }
+
+    if (type === 'date.min') {
+      return {
+        message: `${context.key} must be later than or equal to today`,
+      };
+    }
+    if (type === 'date.base') {
+      return {
+        message: `${context.key} must be later than or equal to today`,
+      };
+    }
+    return `${context.key} must be a valid date type and must be greater than or equal to today`;
+  });
+
 export const createFixtureSchema = Joi.object()
   .keys({
-    date: Joi.date()
-      .min('now')
-      .required()
-      .error(errors => {
-        const [error] = errors;
-        const { type, context } = error;
-        if (type === 'any.required') {
-          return {
-            message: `${context.key} is required`,
-          };
-        }
-        if (type === 'any.empty') {
-          return {
-            message: `${context.key} is required`,
-          };
-        }
-
-        if (type === 'date.min') {
-          return {
-            message: `${context.key} must be later than or equal to today`,
-          };
-        }
-        if (type === 'date.base') {
-          return {
-            message: `${context.key} must be later than or equal to today`,
-          };
-        }
-        return `${context.key} must be a valid date type and must be greater than or equal to today`;
-      }),
+    date: fixtureDateSchema.required(),
     homeTeamId: objectIdSchema.required(),
     awayTeamId: objectIdSchema.required(),
     referee: alphabetsOnlySchema.min(4).required(),
@@ -151,5 +153,15 @@ export const createFixtureSchema = Joi.object()
 export const fixtureIdSchema = Joi.object()
   .keys({
     fixtureId: objectIdSchema.required(),
+  })
+  .options({ ...options });
+
+export const updateFixtureSchema = Joi.object()
+  .keys({
+    date: fixtureDateSchema,
+    referee: alphabetsOnlySchema.min(4),
+    status: stringSchema
+      .uppercase()
+      .valid(['PENDING', 'PLAYED', 'POSTPONED', 'CANCELLED']),
   })
   .options({ ...options });

@@ -19,9 +19,9 @@ let userToken;
 let adminToken;
 
 beforeAll(async () => {
-  await User.deleteMany({});
-  await Team.deleteMany({});
-  await Fixture.deleteMany({});
+  User.deleteMany({});
+  Team.deleteMany({});
+  Fixture.deleteMany({});
   const users = await User.insertMany([mockAdmin, mockUser]);
   await Team.insertMany([mockTeam1, mockTeam2]);
   adminToken = await generateToken({ id: users[0]._id }, '5m');
@@ -249,6 +249,97 @@ describe('E2E Fetch a single fixture', () => {
       .get(`${fixturesUrl}/5e1b70de48bd99411c09389e---`)
       .set('authorization', `Bearer ${userToken}`);
 
+    expect(res.status).toBe(422);
+    expect(res.body.error[0]).toBe(
+      'fixtureId must be a valid mongodb objectId',
+    );
+  });
+});
+
+describe('E2E Fixture Update', () => {
+  let fixture;
+  let newAdminToken;
+  const updateBody = {
+    date: '9-25-2022',
+    referee: 'Joane Pipi',
+    status: 'PLAYED',
+  };
+
+  it('should throw an error when a token is not present in the request header', async () => {
+    fixture = await Fixture.findOne();
+    const newAdminUser = await User.insertMany([
+      {
+        _id: '507f1f77bcf95cd799439011',
+        fullName: 'Test Admin',
+        email: 'test-admin@example.com',
+        password: 'password1',
+        role: 'ADMIN',
+      },
+    ]);
+
+    newAdminToken = generateToken({ id: newAdminUser[0]._id }, '5m');
+
+    const res = await request(app)
+      .patch(`${fixturesUrl}/${fixture._id}`)
+      .send(updateBody);
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe('Unauthorized user, please login');
+  });
+
+  it('should throw an error when the user making the request does not have admin rights', async () => {
+    const res = await request(app)
+      .patch(`${fixturesUrl}/${fixture._id}`)
+      .set('authorization', `Bearer ${userToken}`)
+      .send(updateBody);
+    expect(res.status).toBe(403);
+  });
+
+  it('should throw an error when the user making the request is an admin but is not the creator of the resource', async () => {
+    const res = await request(app)
+      .patch(`${fixturesUrl}/${fixture._id}`)
+      .set('authorization', `Bearer ${newAdminToken}`)
+      .send(updateBody);
+    expect(res.status).toBe(403);
+  });
+
+  it('should update a fixture successfully when valid inputs are supplied', async () => {
+    const res = await request(app)
+      .patch(`${fixturesUrl}/${fixture._id}`)
+      .set('authorization', `Bearer ${adminToken}`)
+      .send(updateBody);
+    expect(res.status).toBe(200);
+    expect(Object.keys(res.body.data).includes('referee')).toBeTruthy();
+    expect(Object.keys(res.body.data).includes('date')).toBeTruthy();
+  });
+
+  it('should throw an error when an invalid value is passed in the status field', async () => {
+    const res = await request(app)
+      .patch(`${fixturesUrl}/${fixture._id}`)
+      .set('authorization', `Bearer ${adminToken}`)
+      .send({ ...updateBody, status: 'new status' });
+
+    expect(res.status).toBe(422);
+    expect(res.body.error[0]).toBe(
+      'status must be one of [PENDING, PLAYED, POSTPONED, CANCELLED]',
+    );
+  });
+
+  it('should throw an error when an invalid value is passed into the referee field', async () => {
+    const res = await request(app)
+      .patch(`${fixturesUrl}/${fixture._id}`)
+      .set('authorization', `Bearer ${adminToken}`)
+      .send({ ...updateBody, referee: 'boss ---!' });
+    expect(res.status).toBe(422);
+    expect(res.body.error[0]).toBe(
+      'referee can only contain alphabets and whitespace between words',
+    );
+  });
+
+  it('should throw an error when the fixtureId passed is not a valid MongoDB ObjectId', async () => {
+    const res = await request(app)
+      .patch(`${fixturesUrl}/p-=872---`)
+      .set('authorization', `Bearer ${adminToken}`)
+      .send(updateBody);
     expect(res.status).toBe(422);
     expect(res.body.error[0]).toBe(
       'fixtureId must be a valid mongodb objectId',

@@ -18,6 +18,7 @@ let adminToken;
 
 beforeAll(async () => {
   await User.deleteMany({});
+  await Team.deleteMany({});
   const users = await User.insertMany([mockAdmin, mockUser]);
   adminToken = await generateToken({ id: users[0]._id }, '5m');
   userToken = await generateToken({ id: users[1]._id }, '5m');
@@ -44,6 +45,8 @@ describe('E2E Team creation', () => {
       .post(teamsUrl)
       .set('authorization', `Bearer ${userToken}`)
       .send(mocks.mockTeam1);
+    console.log(res.body);
+
     expect(res.status).toBe(403);
   });
 
