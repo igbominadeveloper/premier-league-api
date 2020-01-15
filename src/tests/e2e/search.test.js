@@ -10,6 +10,7 @@ import * as fixtureMocks from '../mocks/fixtures';
 import User from '../../db/models/User';
 import Team from '../../db/models/Team';
 import Fixture from '../../db/models/Fixture';
+import { getRedisClient } from '../../config/redis';
 
 const searchUrl = '/api/v1/search';
 
@@ -28,9 +29,10 @@ beforeAll(async done => {
 });
 
 afterAll(async done => {
-  await User.deleteMany({});
-  await Team.deleteMany({});
-  await Fixture.deleteMany({});
+  // await User.deleteMany({});
+  // await Team.deleteMany({});
+  // await Fixture.deleteMany({});
+  getRedisClient().quit();
   await mongoose.connection.close();
   done();
 });
@@ -50,7 +52,6 @@ describe('E2E Search Functionality', () => {
       .get(searchUrl)
       .query({ q: '' });
 
-    console.log(res.body);
     expect(res.status).toBe(422);
     expect(res.body.error[0]).toBe('q is not allowed to be empty');
   });

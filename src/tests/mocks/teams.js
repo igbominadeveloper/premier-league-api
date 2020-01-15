@@ -1,15 +1,23 @@
+import { Types } from 'mongoose';
+
 export const mockTeam1 = {
-  _id: '507f1f77bcf86cd799439013',
+  _id: Types.ObjectId(),
   name: 'Arsenal',
   stadium: 'Emirates Stadium',
   manager: 'Mikel Arteta',
 };
 
 export const mockTeam2 = {
-  _id: '507f1f77bcf86cd799439014',
+  _id: Types.ObjectId(),
   name: 'Manchester City',
   stadium: 'Etihad Stadium',
   manager: 'Pep Guardiola',
+};
+
+export const healthyTeam = {
+  name: 'Arsenal Ladies',
+  stadium: 'Emirates Stadium Extended',
+  manager: 'Mikel Arteta Jnr',
 };
 
 export const missingName = {
