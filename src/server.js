@@ -5,6 +5,7 @@ import morgan from 'morgan';
 
 import router from './routes';
 import dbconnect from './config/db';
+import startRedisClient from './config/redis';
 
 // Create global app object
 const app = express();
@@ -32,6 +33,9 @@ app.get('/', (req, res) =>
   }),
 );
 
+// start redis connection
+startRedisClient();
+
 // API routes
 app.use('/api/v1', router);
 
@@ -41,6 +45,8 @@ app.all('*', (req, res) =>
     error: 'Method not allowed',
   }),
 );
+
+// create and connect redis client to local instance.
 
 const port = process.env.PORT || 5000;
 

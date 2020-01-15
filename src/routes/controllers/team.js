@@ -2,7 +2,7 @@ import Team from '../../db/models/Team';
 import * as helpers from '../../utils/helpers';
 
 export const create = async (req, res) => {
-  const { name, manager } = req.body;
+  const { name, manager, stadium } = req.body;
 
   try {
     const existingTeam = await helpers.checkIfAnyMatchingRecordExists(Team, {
@@ -14,8 +14,14 @@ export const create = async (req, res) => {
       return helpers.errorResponse(res, 409, 'This Team exists already');
     }
 
-    const newTeam = await Team.create(req.body);
+    const newTeam = await Team.create({ name, manager, stadium });
+    helpers.storeToRedis(`teams:${newTeam._id}`, newTeam);
 
+    Team.find()
+      .then(teams => helpers.storeToRedis('teams', teams))
+      .catch(error => {
+        throw Error(error);
+      });
     return helpers.successResponse(res, 201, 'Team created successfully', {
       id: newTeam._id,
       name: newTeam.name,
@@ -30,8 +36,24 @@ export const create = async (req, res) => {
 
 export const all = async (req, res) => {
   try {
-    const allTeams = await Team.find();
-    return helpers.successResponse(res, 200, 'Got all teams', allTeams);
+    return helpers.getFromRedis('teams', async result => {
+      if (result) {
+        return helpers.successResponse(
+          res,
+          200,
+          'Got all teams from redis',
+          JSON.parse(result),
+        );
+      }
+      const allTeams = await Team.find();
+      helpers.storeToRedis('teams', allTeams);
+      return helpers.successResponse(
+        res,
+        200,
+        'Got all teams from db',
+        allTeams,
+      );
+    });
   } catch (error) {
     /* istanbul ignore next */
     return helpers.serverError(res, error.message);
@@ -45,36 +67,50 @@ export const update = async (req, res) => {
   const { teamId } = req.params;
 
   try {
-    const teamToUpdate = await Team.findById({ _id: teamId });
-    if (!teamToUpdate) {
-      return helpers.errorResponse(res, 404, 'This team does not exist');
-    }
+    return helpers.getFromRedis(`teams:${teamId}`, async result => {
+      if (!result) {
+        const teamToUpdate = await Team.findById({ _id: teamId });
+        if (!teamToUpdate) {
+          return helpers.errorResponse(res, 404, 'This team does not exist');
+        }
+      }
 
-    const existingTeams = await helpers.checkIfAnyMatchingRecordExists(Team, {
-      name,
-      manager,
-    });
+      const existingTeams = await helpers.checkIfAnyMatchingRecordExists(Team, {
+        name,
+        manager,
+      });
 
-    const matchFound = existingTeams.find(team => String(team._id) === teamId);
-
-    if (existingTeams.length && !matchFound) {
-      return helpers.errorResponse(
-        res,
-        409,
-        'A team with these details exists already',
+      const matchFound = existingTeams.find(
+        team => String(team._id) === teamId,
       );
-    }
 
-    const updatedTeam = await Team.findOneAndUpdate(
-      { _id: teamId },
-      { ...req.body },
-      { new: true },
-    );
+      if (existingTeams.length && !matchFound) {
+        return helpers.errorResponse(
+          res,
+          409,
+          'A team with these details exists already',
+        );
+      }
 
-    return helpers.successResponse(res, 200, 'Team updated successfully', {
-      name: updatedTeam.name,
-      stadium: updatedTeam.stadium,
-      manager: updatedTeam.manager,
+      const updatedTeam = await Team.findOneAndUpdate(
+        { _id: teamId },
+        { ...req.body },
+        { new: true },
+      );
+
+      helpers.storeToRedis(`teams:${teamId}`, updatedTeam);
+
+      Team.find()
+        .then(teams => helpers.storeToRedis('teams', teams))
+        .catch(error => {
+          throw Error(error);
+        });
+
+      return helpers.successResponse(res, 200, 'Team updated successfully', {
+        name: updatedTeam.name,
+        stadium: updatedTeam.stadium,
+        manager: updatedTeam.manager,
+      });
     });
   } catch (error) {
     /* istanbul ignore next */
@@ -86,11 +122,24 @@ export const find = async (req, res) => {
   const { teamId } = req.params;
 
   try {
-    const team = await Team.findOne({ _id: teamId });
-    if (!team) {
-      return helpers.errorResponse(res, 404, 'This team does not exist');
-    }
-    return helpers.successResponse(res, 200, 'Team found', team);
+    return helpers.getFromRedis(`teams:${teamId}`, async result => {
+      if (result) {
+        return helpers.successResponse(
+          res,
+          200,
+          'Response from redis',
+          JSON.parse(result),
+        );
+      }
+
+      const team = await Team.findOne({ _id: teamId });
+      if (!team) {
+        return helpers.errorResponse(res, 404, 'This team does not exist');
+      }
+
+      helpers.storeToRedis(`teams:${teamId}`, team);
+      return helpers.successResponse(res, 200, 'Response from db', team);
+    });
   } catch (error) {
     /* istanbul ignore next */
     return helpers.serverError(res, error.message);
@@ -106,7 +155,15 @@ export const deleteOne = async (req, res) => {
       return helpers.errorResponse(res, 404, 'This team does not exist');
     }
     const deletedTeam = await Team.findByIdAndDelete({ _id: teamId });
+
     if (deletedTeam) {
+      helpers.removeFromRedis(`teams:${teamId}`);
+      Team.find()
+        .then(result => helpers.storeToRedis('teams', result))
+        .catch(error => {
+          throw Error(error);
+        });
+
       return helpers.successResponse(res, 200, 'Team Deleted');
     }
     /* istanbul ignore next */

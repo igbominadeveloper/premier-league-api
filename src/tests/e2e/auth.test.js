@@ -3,19 +3,21 @@ import mongoose from 'mongoose';
 
 import app from '../../server';
 import * as mocks from '../mocks/users';
+
 import User from '../../db/models/User';
+
+import { getRedisClient } from '../../config/redis';
 
 const signupUrl = '/api/v1/auth/signup';
 const loginUrl = '/api/v1/auth/login';
 
-beforeAll(async done => {
+beforeAll(async () => {
   await User.deleteMany({});
-  done();
 });
 
 afterAll(async done => {
-  await User.deleteMany({});
   await mongoose.connection.close();
+  getRedisClient().quit();
   done();
 });
 
@@ -23,7 +25,7 @@ describe('E2E User registration', () => {
   it('should create a user successfully when valid inputs are supplied', async () => {
     const res = await request(app)
       .post(signupUrl)
-      .send(mocks.mockUser);
+      .send(mocks.healthyUser);
 
     expect(res.status).toBe(201);
     expect(Object.keys(res.body.data).includes('token')).toBeTruthy();
@@ -75,7 +77,7 @@ describe('E2E User Login', () => {
   it('should login a user successfully when valid inputs are supplied', async () => {
     const res = await request(app)
       .post(loginUrl)
-      .send(mocks.mockUser);
+      .send(mocks.healthyUser);
     expect(res.status).toBe(200);
     expect(Object.keys(res.body.data).includes('token')).toBeTruthy();
     expect(res.body.data.token).not.toBe('');

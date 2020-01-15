@@ -1,10 +1,11 @@
 import faker from 'faker';
+import { Types } from 'mongoose';
 
 import { mockAdmin } from './users';
 import * as teams from './teams';
 
 export const mockFixture1 = {
-  _id: '507f1f77bcf86cd799439016',
+  _id: Types.ObjectId(),
   date: '1-22-2020',
   homeTeamId: teams.mockTeam1._id,
   awayTeamId: teams.mockTeam2._id,
@@ -15,7 +16,7 @@ export const mockFixture1 = {
 };
 
 export const mockFixture2 = {
-  _id: '507f1f77bcf86cd799439017',
+  _id: Types.ObjectId(),
   date: '1-22-2020',
   homeTeamId: teams.mockTeam2._id,
   awayTeamId: teams.mockTeam1._id,
@@ -23,6 +24,13 @@ export const mockFixture2 = {
   status: 'PENDING',
   uniqueLink: faker.internet.url(),
   createdBy: mockAdmin._id,
+};
+
+export const healthyFixture = {
+  date: '1-22-2024',
+  homeTeamId: teams.mockTeam1._id,
+  awayTeamId: teams.mockTeam2._id,
+  referee: 'Phil Dowd',
 };
 
 export const missingDate = {

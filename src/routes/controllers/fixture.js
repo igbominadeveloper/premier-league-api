@@ -1,5 +1,4 @@
 import Fixture from '../../db/models/Fixture';
-
 import * as helpers from '../../utils/helpers';
 
 export const create = async (req, res) => {
@@ -53,6 +52,13 @@ export const create = async (req, res) => {
       uniqueLink: fixtureLink,
     });
 
+    helpers.storeToRedis(`fixture:${newFixture._id}`, newFixture);
+    Fixture.find()
+      .then(fixtures => helpers.storeToRedis('fixtures', fixtures))
+      .catch(error => {
+        throw Error(error);
+      });
+
     return helpers.successResponse(res, 201, 'Fixture created successfully', {
       date: new Date(newFixture.date).toUTCString(),
       stadium: homeTeam.stadium,
@@ -71,12 +77,33 @@ export const all = async (req, res) => {
   const { status } = req.query;
 
   try {
-    const fixtures = await Fixture.find(
-      status && {
-        status: status.toUpperCase(),
-      },
-    );
-    return helpers.successResponse(res, 200, 'Fetched all fixtures', fixtures);
+    const key = status ? `fixtures:${status}` : 'fixtures';
+
+    return helpers.getFromRedis(key, async result => {
+      if (result && result.length > 0) {
+        return helpers.successResponse(
+          res,
+          200,
+          'Fetched all fixtures from redis',
+          JSON.parse(result),
+        );
+      }
+
+      const fixtures = await Fixture.find(
+        status && {
+          status: status.toUpperCase(),
+        },
+      );
+
+      helpers.storeToRedis(key, fixtures);
+
+      return helpers.successResponse(
+        res,
+        200,
+        'Fetched all fixtures from db',
+        fixtures,
+      );
+    });
   } catch (error) {
     return helpers.serverError(res, error.message);
   }
@@ -86,11 +113,26 @@ export const find = async (req, res) => {
   const { fixtureId } = req.params;
 
   try {
-    const fixture = await helpers.checkIfFixtureExists({ _id: fixtureId });
-    if (!fixture) {
-      return helpers.errorResponse(res, 404, 'This fixture does not exist');
-    }
-    return helpers.successResponse(res, 200, 'Fixture found', fixture);
+    return helpers.getFromRedis(`fixtures:${fixtureId}`, async result => {
+      if (result) {
+        return helpers.successResponse(
+          res,
+          200,
+          'Fixture found in redis',
+          JSON.parse(result),
+        );
+      }
+
+      const fixture = await helpers.checkIfFixtureExists({ _id: fixtureId });
+
+      if (!fixture) {
+        return helpers.errorResponse(res, 404, 'This fixture does not exist');
+      }
+
+      helpers.storeToRedis(`fixtures:${fixtureId}`, fixture);
+
+      return helpers.successResponse(res, 200, 'Fixture found in db', fixture);
+    });
   } catch (error) {
     /* istanbul ignore next */
     return helpers.serverError(res, error.message);
@@ -106,6 +148,14 @@ export const update = async (req, res) => {
       { ...req.body },
       { new: true },
     );
+
+    helpers.storeToRedis(`fixtures:${fixtureId}`, updatedFixture);
+
+    Fixture.find()
+      .then(result => helpers.storeToRedis('fixtures', result))
+      .catch(error => {
+        throw Error(error);
+      });
 
     return helpers.successResponse(res, 200, 'Fixture updated successfully', {
       name: updatedFixture.name,
@@ -124,6 +174,14 @@ export const deleteOne = async (req, res) => {
   try {
     const deletedFixture = await Fixture.findByIdAndDelete({ _id: fixtureId });
     if (deletedFixture) {
+      helpers.removeFromRedis(`fixtures:${fixtureId}`);
+
+      Fixture.find()
+        .then(result => helpers.storeToRedis('fixtures', result))
+        .catch(error => {
+          throw Error(error);
+        });
+
       return helpers.successResponse(res, 200, 'Fixture Deleted');
     }
     /* istanbul ignore next */

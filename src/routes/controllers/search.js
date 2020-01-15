@@ -6,33 +6,54 @@ import {
   checkIfAnyMatchingRecordExists,
   successResponse,
   errorResponse,
+  getFromRedis,
+  storeToRedis,
 } from '../../utils/helpers';
 
 export const find = async (req, res) => {
   const { q } = req.query;
 
   try {
-    const userSearch = checkIfAnyMatchingRecordExists(User, {
-      fullName: q,
-    });
-    const teamSearch = checkIfAnyMatchingRecordExists(Team, {
-      name: q,
-      stadium: q,
-      manager: q,
-    });
+    const redisKey = `search:${q}`;
+    return getFromRedis(redisKey, async result => {
+      if (result) {
+        const responseBody = JSON.parse(result);
 
-    const fixtureSearch = checkIfAnyMatchingRecordExists(Fixture, {
-      referee: q,
-      uniqueLink: q,
-      status: q,
-    });
+        return successResponse(res, 200, 'Results from redis', {
+          users: responseBody[0],
+          teams: responseBody[1],
+          fixtures: responseBody[2],
+        });
+      }
 
-    const results = await Promise.all([userSearch, teamSearch, fixtureSearch]);
+      const userSearch = checkIfAnyMatchingRecordExists(User, {
+        fullName: q,
+      });
+      const teamSearch = checkIfAnyMatchingRecordExists(Team, {
+        name: q,
+        stadium: q,
+        manager: q,
+      });
 
-    return successResponse(res, 200, 'Matches', {
-      users: results[0],
-      teams: results[1],
-      fixtures: results[2],
+      const fixtureSearch = checkIfAnyMatchingRecordExists(Fixture, {
+        referee: q,
+        uniqueLink: q,
+        status: q,
+      });
+
+      const results = await Promise.all([
+        userSearch,
+        teamSearch,
+        fixtureSearch,
+      ]);
+
+      storeToRedis(redisKey, results);
+
+      return successResponse(res, 200, 'Results from db', {
+        users: results[0],
+        teams: results[1],
+        fixtures: results[2],
+      });
     });
   } catch (error) {
     /* istanbul ignore next */

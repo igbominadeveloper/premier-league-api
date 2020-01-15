@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import User from '../db/models/User';
 import Fixture from '../db/models/Fixture';
 import Team from '../db/models/Team';
+import { getRedisClient } from '../config/redis';
 
 dotenv.config();
 
@@ -140,3 +141,14 @@ export const stripAllSpaces = words => words.replace(/\s/gi, '');
  * @returns {null} if record does not exist
  */
 export const checkIfTeamExists = keys => Team.findOne({ ...keys });
+
+export const storeToRedis = (key, values) =>
+  getRedisClient().setex(key, 3600, JSON.stringify(values));
+
+export const removeFromRedis = key => getRedisClient().del(key);
+
+export const getFromRedis = (key, callback) =>
+  getRedisClient().get(key, (error, result) => {
+    if (error) throw Error(error);
+    return callback(result);
+  });

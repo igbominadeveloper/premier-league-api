@@ -10,6 +10,7 @@ import User from '../../db/models/User';
 import Team from '../../db/models/Team';
 
 import { generateToken } from '../../utils/helpers';
+import { getRedisClient } from '../../config/redis';
 
 const teamsUrl = '/api/v1/teams';
 
@@ -25,8 +26,9 @@ beforeAll(async () => {
 });
 
 afterAll(async done => {
-  await User.deleteMany({});
-  await Team.deleteMany({});
+  // await User.deleteMany({});
+  // await Team.deleteMany({});
+  getRedisClient().quit();
   await mongoose.connection.close();
   done();
 });
@@ -36,8 +38,9 @@ describe('E2E Team creation', () => {
     const res = await request(app)
       .post(teamsUrl)
       .send(mocks.mockTeam1);
+
     expect(res.status).toBe(401);
-    expect(res.body.message).toBe('Unauthorized user, please login');
+    expect(res.body.message).toBe('No token set, please login');
   });
 
   it('should throw an error when the user making the request does not have admin rights', async () => {
@@ -53,7 +56,8 @@ describe('E2E Team creation', () => {
     const res = await request(app)
       .post(teamsUrl)
       .set('authorization', `Bearer ${adminToken}`)
-      .send(mocks.mockTeam1);
+      .send(mocks.healthyTeam);
+
     expect(res.status).toBe(201);
     expect(Object.keys(res.body.data).includes('name')).toBeTruthy();
     expect(Object.keys(res.body.data).includes('stadium')).toBeTruthy();
@@ -61,10 +65,12 @@ describe('E2E Team creation', () => {
   });
 
   it('should throw an error when the team is existing already', async () => {
+    console.log(adminToken, '>>>');
+
     const res = await request(app)
       .post(teamsUrl)
       .set('authorization', `Bearer ${adminToken}`)
-      .send(mocks.mockTeam1);
+      .send(mocks.healthyTeam);
     expect(res.status).toBe(409);
     expect(res.body.message).toBe('This Team exists already');
   });
@@ -110,7 +116,7 @@ describe('E2E Fetch all teams', () => {
     const res = await request(app).get(teamsUrl);
 
     expect(res.status).toBe(401);
-    expect(res.body.message).toBe('Unauthorized user, please login');
+    expect(res.body.message).toBe('No token set, please login');
   });
 
   it('should fetch all teams', async () => {
@@ -138,7 +144,7 @@ describe('E2E Team Update', () => {
       .patch(`${teamsUrl}/${team._id}`)
       .send(updateBody);
     expect(res.status).toBe(401);
-    expect(res.body.message).toBe('Unauthorized user, please login');
+    expect(res.body.message).toBe('No token set, please login');
   });
 
   it('should throw an error when the user making the request does not have admin rights', async () => {
@@ -218,7 +224,7 @@ describe('E2E Fetch a single team', () => {
     const res = await request(app).get(`${teamsUrl}/${team._id}`);
 
     expect(res.status).toBe(401);
-    expect(res.body.message).toBe('Unauthorized user, please login');
+    expect(res.body.message).toBe('No token set, please login');
   });
 
   it('should fetch a team successfully', async () => {
@@ -256,7 +262,7 @@ describe('E2E Delete a team', () => {
     const res = await request(app).delete(`${teamsUrl}/${team._id}`);
 
     expect(res.status).toBe(401);
-    expect(res.body.message).toBe('Unauthorized user, please login');
+    expect(res.body.message).toBe('No token set, please login');
   });
 
   it('should delete a team successfully', async () => {

@@ -1,5 +1,7 @@
+import { Types } from 'mongoose';
+
 export const mockUser = {
-  _id: '5e1cf8621f0db217c38d7559',
+  _id: Types.ObjectId(),
   fullName: 'John Doe',
   email: 'john.doe@example.com',
   password: 'password',
@@ -7,9 +9,23 @@ export const mockUser = {
 };
 
 export const mockAdmin = {
-  _id: '5e1cf8659f0db217c38d7559',
+  _id: Types.ObjectId(),
   fullName: 'Jane Doe',
   email: 'jane.doe@example.com',
+  password: 'password',
+  role: 'ADMIN',
+};
+
+export const healthyAdmin = {
+  fullName: 'Test Admin',
+  email: 'test-admin@example.com',
+  password: 'password',
+  role: 'ADMIN',
+};
+
+export const healthyUser = {
+  fullName: 'Test User',
+  email: 'test-user@example.com',
   password: 'password',
   role: 'ADMIN',
 };

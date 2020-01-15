@@ -12,6 +12,7 @@ import Fixture from '../../db/models/Fixture';
 import Team from '../../db/models/Team';
 
 import { generateToken } from '../../utils/helpers';
+import { getRedisClient } from '../../config/redis';
 
 const fixturesUrl = '/api/v1/fixtures';
 
@@ -19,19 +20,20 @@ let userToken;
 let adminToken;
 
 beforeAll(async () => {
-  User.deleteMany({});
-  Team.deleteMany({});
-  Fixture.deleteMany({});
+  await Team.deleteMany({});
+  await User.deleteMany({});
+  await Fixture.deleteMany({});
   const users = await User.insertMany([mockAdmin, mockUser]);
   await Team.insertMany([mockTeam1, mockTeam2]);
-  adminToken = await generateToken({ id: users[0]._id }, '5m');
-  userToken = await generateToken({ id: users[1]._id }, '5m');
+  adminToken = await generateToken({ id: users[0]._id }, '1h');
+  userToken = await generateToken({ id: users[1]._id }, '1h');
 });
 
 afterAll(async done => {
-  await User.deleteMany({});
-  await Team.deleteMany({});
-  await Fixture.deleteMany({});
+  // await User.deleteMany({});
+  // await Team.deleteMany({});
+  // await Fixture.deleteMany({});
+  getRedisClient().quit();
   await mongoose.connection.close();
   done();
 });
@@ -40,16 +42,16 @@ describe('E2E Fixture creation', () => {
   it('should throw an error when a token is not present in the request header', async () => {
     const res = await request(app)
       .post(fixturesUrl)
-      .send(mocks.mockFixture1);
+      .send(mocks.healthyFixture);
     expect(res.status).toBe(401);
-    expect(res.body.message).toBe('Unauthorized user, please login');
+    expect(res.body.message).toBe('No token set, please login');
   });
 
   it('should throw an error when the user making the request does not have admin rights', async () => {
     const res = await request(app)
       .post(fixturesUrl)
       .set('authorization', `Bearer ${userToken}`)
-      .send(mocks.mockFixture1);
+      .send(mocks.healthyFixture);
     expect(res.status).toBe(403);
   });
 
@@ -57,7 +59,7 @@ describe('E2E Fixture creation', () => {
     const res = await request(app)
       .post(fixturesUrl)
       .set('authorization', `Bearer ${adminToken}`)
-      .send(mocks.mockFixture1);
+      .send(mocks.healthyFixture);
     expect(res.status).toBe(201);
     expect(Object.keys(res.body.data).includes('referee')).toBeTruthy();
     expect(Object.keys(res.body.data).includes('homeTeam')).toBeTruthy();
@@ -69,7 +71,7 @@ describe('E2E Fixture creation', () => {
     const res = await request(app)
       .post(fixturesUrl)
       .set('authorization', `Bearer ${adminToken}`)
-      .send(mocks.mockFixture1);
+      .send(mocks.healthyFixture);
     expect(res.status).toBe(409);
     expect(res.body.message).toBe('This Fixture exists already');
   });
@@ -147,7 +149,7 @@ describe('E2E Fetch all fixtures', () => {
     const res = await request(app).get(fixturesUrl);
 
     expect(res.status).toBe(401);
-    expect(res.body.message).toBe('Unauthorized user, please login');
+    expect(res.body.message).toBe('No token set, please login');
   });
 
   it('should fetch all fixtures', async () => {
@@ -223,7 +225,7 @@ describe('E2E Fetch a single fixture', () => {
     const res = await request(app).get(`${fixturesUrl}/${fixture._id}`);
 
     expect(res.status).toBe(401);
-    expect(res.body.message).toBe('Unauthorized user, please login');
+    expect(res.body.message).toBe('No token set, please login');
   });
 
   it('should fetch a fixture successfully', async () => {
@@ -283,7 +285,7 @@ describe('E2E Fixture Update', () => {
       .patch(`${fixturesUrl}/${fixture._id}`)
       .send(updateBody);
     expect(res.status).toBe(401);
-    expect(res.body.message).toBe('Unauthorized user, please login');
+    expect(res.body.message).toBe('No token set, please login');
   });
 
   it('should throw an error when the user making the request does not have admin rights', async () => {
@@ -352,7 +354,7 @@ describe('E2E Delete a fixture', () => {
     const res = await request(app).delete(`${fixturesUrl}/${fixture._id}`);
 
     expect(res.status).toBe(401);
-    expect(res.body.message).toBe('Unauthorized user, please login');
+    expect(res.body.message).toBe('No token set, please login');
   });
 
   it('should throw an error when the user making the request is an admin but is not the creator of the resource', async () => {
