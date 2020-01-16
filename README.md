@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/igbominadeveloper/premier-league-api.svg?branch=develop)](https://travis-ci.org/igbominadeveloper/premier-league-api) 
 [![Coverage Status](https://coveralls.io/repos/github/igbominadeveloper/premier-league-api/badge.svg?branch=develop)](https://coveralls.io/github/igbominadeveloper/premier-league-api?branch=develop)
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/eadae7c163d06c3c0c81)
 # premier-league-api
 
 ## Technologies
