@@ -33,7 +33,7 @@ export const signup = async (req, res) => {
     };
     const token = helpers.generateToken(tokenPayload);
 
-    helpers.setRequestUser(tokenPayload);
+    helpers.setRequestUser(req, tokenPayload);
 
     return helpers.successResponse(res, 201, 'Account created successfully', {
       token,
@@ -76,7 +76,7 @@ export const login = async (req, res) => {
     };
     const token = helpers.generateToken(tokenPayload);
 
-    helpers.setRequestUser(tokenPayload);
+    helpers.setRequestUser(req, tokenPayload);
 
     return helpers.successResponse(res, 200, 'Login successful', {
       token,
