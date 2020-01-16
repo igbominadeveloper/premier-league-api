@@ -25,8 +25,7 @@ const limiter = (req, res, next) => {
         res,
         429,
         `Too many requests, now you will have to rest for ${MAX_WAIT_TIME /
-          60 /
-          1000} minutes`,
+          60} minutes`,
       );
     }
     // increase the count by 1 and call next

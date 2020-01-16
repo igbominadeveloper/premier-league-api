@@ -46,7 +46,11 @@ export const all = async (req, res) => {
         );
       }
       const allTeams = await Team.find();
-      helpers.storeToRedis('teams', allTeams);
+
+      if (allTeams.length) {
+        helpers.storeToRedis('teams', allTeams);
+      }
+
       return helpers.successResponse(
         res,
         200,

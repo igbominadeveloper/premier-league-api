@@ -4,10 +4,12 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+import session from 'express-session';
+import connectRedis from 'connect-redis';
 
 import router from './routes';
 import dbconnect from './config/db';
-import startRedisClient from './config/redis';
+import startRedisClient, { getRedisClient } from './config/redis';
 import limiter from './routes/middlewares/rate-limiter';
 
 // Create global app object
@@ -17,8 +19,10 @@ app.use(cors());
 // enable use of dotenv config file.
 dotenv.config();
 
+const { NODE_ENV, PORT, SECRET_KEY } = process.env;
+
 // enable morgan logs only in development environment
-if (process.env.NODE_ENV === 'development') {
+if (NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
@@ -30,8 +34,21 @@ app.use(
 
 app.use(express.json());
 
-// apply rate limiter to every request
-if (process.env.NODE_ENV !== 'test') {
+const redisStore = connectRedis(session);
+
+if (NODE_ENV !== 'test') {
+  app.use(
+    session({
+      secret: SECRET_KEY,
+      store: new redisStore({
+        client: getRedisClient(),
+      }),
+      saveUninitialized: false,
+      resave: false,
+    }),
+  );
+
+  // apply rate limiter to every request
   app.use(limiter);
 }
 
@@ -56,7 +73,7 @@ app.all('*', (req, res) =>
 
 // create and connect redis client to local instance.
 
-const port = process.env.PORT || 5000;
+const port = PORT || 5000;
 
 // finally, let's start our server...
 dbconnect()
@@ -64,7 +81,7 @@ dbconnect()
     if (!module.parent) {
       app.listen(port, () => {
         console.log(
-          `Server running on ${process.env.NODE_ENV} environment, on port ${port}`,
+          `Server running on ${NODE_ENV} environment, on port ${port}`,
         );
       });
     }

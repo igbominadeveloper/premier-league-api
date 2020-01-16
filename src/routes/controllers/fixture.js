@@ -3,7 +3,7 @@ import * as helpers from '../../utils/helpers';
 
 export const create = async (req, res) => {
   const { date, homeTeamId, awayTeamId } = req.body;
-  const { _id: userId } = req.user;
+  const reqUser = helpers.getRequestUser(req);
 
   try {
     const existingFixture = await helpers.checkIfFixtureExists({
@@ -48,7 +48,7 @@ export const create = async (req, res) => {
 
     const newFixture = await Fixture.create({
       ...req.body,
-      createdBy: userId,
+      createdBy: reqUser.id,
       uniqueLink: fixtureLink,
     });
 
@@ -80,7 +80,7 @@ export const all = async (req, res) => {
     const key = status ? `fixtures:${status}` : 'fixtures';
 
     return helpers.getFromRedis(key, async result => {
-      if (result && result.length > 0) {
+      if (result) {
         return helpers.successResponse(
           res,
           200,
@@ -95,7 +95,9 @@ export const all = async (req, res) => {
         },
       );
 
-      helpers.storeToRedis(key, fixtures);
+      if (fixtures.length) {
+        helpers.storeToRedis(key, fixtures);
+      }
 
       return helpers.successResponse(
         res,
