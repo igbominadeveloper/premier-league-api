@@ -16,7 +16,6 @@ export const checkTokenValidity = async (req, res, next) => {
   let token = req.headers.authorization || req.headers['x-access-token'];
 
   if (!token || !token.length > 0) {
-    console.log('No token set, please login');
     /* istanbul ignore next */
     return helpers.errorResponse(res, 401, 'No token set, please login');
   }
@@ -27,7 +26,6 @@ export const checkTokenValidity = async (req, res, next) => {
     const verifiedToken = await helpers.verifyToken(token);
 
     if (!verifiedToken) {
-      console.log('Invalid token, please login');
       /* istanbul ignore next */
       return helpers.errorResponse(res, 401, 'Invalid token, please login');
     }
@@ -37,7 +35,6 @@ export const checkTokenValidity = async (req, res, next) => {
     });
 
     if (!existingUser) {
-      console.log('Unauthorized user, please signup');
       /* istanbul ignore next */
       return helpers.errorResponse(
         res,
@@ -50,6 +47,6 @@ export const checkTokenValidity = async (req, res, next) => {
     next();
   } catch (error) {
     /* istanbul ignore next */
-    return helpers.errorResponse(res, 400, error.message);
+    return helpers.errorResponse(res, 500, error.message);
   }
 };

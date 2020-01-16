@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import redis from 'redis';
 import dotenv from 'dotenv';
 
