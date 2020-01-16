@@ -142,8 +142,8 @@ export const stripAllSpaces = words => words.replace(/\s/gi, '');
  */
 export const checkIfTeamExists = keys => Team.findOne({ ...keys });
 
-export const storeToRedis = (key, values) =>
-  getRedisClient().setex(key, 3600, JSON.stringify(values));
+export const storeToRedis = (key, values, timeout = 3600) =>
+  getRedisClient().setex(key, timeout, JSON.stringify(values));
 
 export const removeFromRedis = key => getRedisClient().del(key);
 

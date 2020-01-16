@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { connect, connection } from 'mongoose';
 import dotenv from 'dotenv';
 import { bold } from 'chalk';
