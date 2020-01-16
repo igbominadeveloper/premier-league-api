@@ -25,8 +25,8 @@ beforeAll(async () => {
   await Fixture.deleteMany({});
   const users = await User.insertMany([mockAdmin, mockUser]);
   await Team.insertMany([mockTeam1, mockTeam2]);
-  adminToken = await generateToken({ id: users[0]._id }, '1h');
-  userToken = await generateToken({ id: users[1]._id }, '1h');
+  adminToken = await generateToken({ id: users[0]._id, role: 'ADMIN' }, '1h');
+  userToken = await generateToken({ id: users[1]._id, role: 'USER' }, '1h');
 });
 
 afterAll(async done => {
@@ -276,7 +276,10 @@ describe('E2E Fixture Update', () => {
       },
     ]);
 
-    newAdminToken = await generateToken({ id: newAdminUser[0]._id }, '5m');
+    newAdminToken = await generateToken(
+      { id: newAdminUser[0]._id, role: 'ADMIN' },
+      '5m',
+    );
 
     const res = await request(app)
       .patch(`${fixturesUrl}/${fixture._id}`)

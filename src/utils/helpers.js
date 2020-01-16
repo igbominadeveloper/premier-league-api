@@ -142,13 +142,51 @@ export const stripAllSpaces = words => words.replace(/\s/gi, '');
  */
 export const checkIfTeamExists = keys => Team.findOne({ ...keys });
 
+/**
+ * store a new value in redis
+ *
+ * @param {string} key to give the redis value
+ * @param {*} values to store against the key
+ * @param {string} timeout before removing the value from redis
+ */
 export const storeToRedis = (key, values, timeout = 3600) =>
   getRedisClient().setex(key, timeout, JSON.stringify(values));
 
+/**
+ * remove a value from redis
+ *
+ * @param {string} key of the value to remove from redis
+ */
 export const removeFromRedis = key => getRedisClient().del(key);
 
+/**
+ * get a value from redis
+ *
+ * @param {string} key of the value to fetch from redis
+ * @param {*} callback the function to call afterwards
+ */
 export const getFromRedis = (key, callback) =>
   getRedisClient().get(key, (error, result) => {
     if (error) throw Error(error);
     return callback(result);
   });
+
+/**
+ * get the request user
+ *
+ * @param {Object} req express request object
+ * @returns {Object} user based on the environment
+ */
+export const getRequestUser = req =>
+  process.env.NODE_ENV === 'test' ? req.user : req.session.user;
+
+/**
+ * set the request user
+ *
+ * @param {Object} req express request object
+ * @returns void
+ */
+export const setRequestUser = (req, userObject) =>
+  process.env.NODE_ENV === 'test'
+    ? (req.user = userObject)
+    : (req.session.user = userObject);

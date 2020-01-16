@@ -21,8 +21,8 @@ beforeAll(async () => {
   await User.deleteMany({});
   await Team.deleteMany({});
   const users = await User.insertMany([mockAdmin, mockUser]);
-  adminToken = await generateToken({ id: users[0]._id }, '1h');
-  userToken = await generateToken({ id: users[1]._id }, '1h');
+  adminToken = await generateToken({ id: users[0]._id, role: 'ADMIN' }, '1h');
+  userToken = await generateToken({ id: users[1]._id, role: 'USER' }, '1h');
 });
 
 afterAll(async done => {
@@ -63,8 +63,6 @@ describe('E2E Team creation', () => {
   });
 
   it('should throw an error when the team is existing already', async () => {
-    console.log(adminToken, '>>>');
-
     const res = await request(app)
       .post(teamsUrl)
       .set('authorization', `Bearer ${adminToken}`)

@@ -2,8 +2,9 @@ import * as helpers from '../../utils/helpers';
 
 export const checkResourceOwner = (Model, key) => async (req, res, next) => {
   const { params } = req;
-  let resource;
   const redisKey = `${Model.modelName.toLowerCase()}s:${params[key]}`;
+  const user = helpers.getRequestUser(req);
+  let resource;
 
   return helpers.getFromRedis(redisKey, async result => {
     if (!result) {
@@ -17,7 +18,7 @@ export const checkResourceOwner = (Model, key) => async (req, res, next) => {
     }
 
     // check if the resource owner is the request user
-    if (String(resource.createdBy) !== String(req.user._id)) {
+    if (String(resource.createdBy) !== String(user.id)) {
       return helpers.errorResponse(
         res,
         403,

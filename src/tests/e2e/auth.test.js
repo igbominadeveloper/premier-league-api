@@ -78,6 +78,7 @@ describe('E2E User Login', () => {
     const res = await request(app)
       .post(loginUrl)
       .send(mocks.healthyUser);
+
     expect(res.status).toBe(200);
     expect(Object.keys(res.body.data).includes('token')).toBeTruthy();
     expect(res.body.data.token).not.toBe('');

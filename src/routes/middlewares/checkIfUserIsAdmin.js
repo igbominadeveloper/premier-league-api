@@ -1,4 +1,4 @@
-import { errorResponse } from '../../utils/helpers';
+import { errorResponse, getRequestUser } from '../../utils/helpers';
 
 /**
  * Check if the user making a request has admin rights
@@ -14,8 +14,9 @@ import { errorResponse } from '../../utils/helpers';
  */
 
 const verifyAdminUser = async (req, res, next) => {
-  const { user } = req;
-  if (user.role !== 'ADMIN') {
+  const reqUser = getRequestUser(req);
+
+  if (reqUser.role !== 'ADMIN') {
     return errorResponse(
       res,
       403,
