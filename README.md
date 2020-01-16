@@ -12,6 +12,12 @@
 
 `Express`
 
+`Redis`
+
+`MongoDB`
+
+`Jest`
+
 ### Installation
 
 Follow these steps to set up the app.
@@ -33,5 +39,7 @@ Follow these steps to set up the app.
 `npm run start:dev`
 
 #### Try out the endpoints
+
+The API documentation can be accessed publicy here - https://documenter.getpostman.com/view/4209025/SWLmX4HS?version=latest
 
 #### Author: Favour Afolayan
