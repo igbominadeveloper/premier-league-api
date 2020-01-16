@@ -26,8 +26,6 @@ beforeAll(async () => {
 });
 
 afterAll(async done => {
-  // await User.deleteMany({});
-  // await Team.deleteMany({});
   getRedisClient().quit();
   await mongoose.connection.close();
   done();

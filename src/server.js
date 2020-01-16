@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import router from './routes';
 import dbconnect from './config/db';
 import startRedisClient from './config/redis';
+import limiter from './routes/middlewares/rate-limiter';
 
 // Create global app object
 const app = express();
@@ -26,6 +27,11 @@ app.use(
 );
 
 app.use(express.json());
+
+// apply rate limiter to every request
+if (process.env.NODE_ENV !== 'test') {
+  app.use(limiter);
+}
 
 app.get('/', (req, res) =>
   res.status(200).json({

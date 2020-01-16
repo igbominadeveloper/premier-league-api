@@ -13,41 +13,29 @@ const { MONGODB_URL, MONGODB_TEST_URL, NODE_ENV } = process.env;
 
 const dbUrl = NODE_ENV === 'test' ? MONGODB_TEST_URL : MONGODB_URL;
 
-connection.on(
-  'connected',
-  async () =>
-    await console.log(
-      connected('Mongoose default connection is open to ', dbUrl),
-    ),
+connection.on('connected', () =>
+  console.log(connected('Mongoose default connection is open to ', dbUrl)),
 );
 
-connection.on(
-  'error',
-  async err =>
-    await console.log(
-      error('Mongoose default connection has occured ' + err + ' error'),
-    ),
+connection.on('error', err =>
+  console.log(
+    error('Mongoose default connection has occured ' + err + ' error'),
+  ),
 );
 
-connection.on(
-  'disconnected',
-  async () =>
-    await console.log(
-      disconnected('Mongoose default connection is disconnected'),
-    ),
+connection.on('disconnected', () =>
+  console.log(disconnected('Mongoose default connection is disconnected')),
 );
 
-process.on(
-  'SIGINT',
-  async () =>
-    await connection.close(() => {
-      console.log(
-        termination(
-          'Mongoose default connection is disconnected due to application termination',
-        ),
-      );
-      process.exit(0);
-    }),
+process.on('SIGINT', () =>
+  connection.close(() => {
+    console.log(
+      termination(
+        'Mongoose default connection is disconnected due to application termination',
+      ),
+    );
+    process.exit(0);
+  }),
 );
 
 const options = {
