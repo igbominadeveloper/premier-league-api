@@ -6,7 +6,7 @@ import * as mocks from '../mocks/users';
 
 import User from '../../db/models/User';
 
-import { getRedisClient } from '../../config/redis';
+import redisClient from '../../config/redis';
 
 const signupUrl = '/api/v1/auth/signup';
 const loginUrl = '/api/v1/auth/login';
@@ -17,7 +17,7 @@ beforeAll(async () => {
 
 afterAll(async done => {
   await mongoose.connection.close();
-  getRedisClient().quit();
+  redisClient.quit();
   done();
 });
 

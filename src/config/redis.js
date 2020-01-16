@@ -1,6 +1,6 @@
 /* istanbul ignore file */
 
-import redis from 'redis';
+import Redis from 'ioredis';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -9,19 +9,21 @@ const { REDIS_URL } = process.env;
 
 const config = REDIS_URL || '';
 
-export const getRedisClient = () => redis.createClient(config);
+const redisClient = new Redis(config);
 
-const startRedisClient = () => {
-  // Print redis errors to the console
-  getRedisClient().on('connect', () =>
-    console.log('Redis server running at ' + getRedisClient().address),
-  );
+const {
+  options: { host, port },
+} = redisClient;
 
-  getRedisClient().on('error', err => {
-    console.log('Error ' + err);
-  });
+// Print redis errors to the console
+redisClient.on('connect', () =>
+  console.log('Redis server running at ' + host + ':' + port),
+);
 
-  process.on('exit', () => getRedisClient().quit());
-};
+redisClient.on('error', err => {
+  console.log('Error ' + err);
+});
 
-export default startRedisClient;
+process.on('exit', () => redisClient.quit());
+
+export default redisClient;

@@ -10,7 +10,7 @@ import User from '../../db/models/User';
 import Team from '../../db/models/Team';
 
 import { generateToken } from '../../utils/helpers';
-import { getRedisClient } from '../../config/redis';
+import redisClient from '../../config/redis';
 
 const teamsUrl = '/api/v1/teams';
 
@@ -26,7 +26,7 @@ beforeAll(async () => {
 });
 
 afterAll(async done => {
-  getRedisClient().quit();
+  redisClient.quit();
   await mongoose.connection.close();
   done();
 });

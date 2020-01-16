@@ -42,4 +42,16 @@ Follow these steps to set up the app.
 
 The API documentation can be accessed publicy here - https://documenter.getpostman.com/view/4209025/SWLmX4HS?version=latest
 
+#### User Accounts/Credentials
+
+Admin Account
+
+- email: Nathan@yesenia.net
+- password: password1
+
+User Account
+
+- email: Shanna@melissa.tv
+- password: password1
+
 #### Author: Favour Afolayan

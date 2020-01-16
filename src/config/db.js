@@ -4,6 +4,8 @@ import { connect, connection } from 'mongoose';
 import dotenv from 'dotenv';
 import { bold } from 'chalk';
 
+import seedRunner from '../db/models/seeder';
+
 dotenv.config();
 
 const connected = bold.cyan;
@@ -15,9 +17,13 @@ const { MONGODB_URL, MONGODB_TEST_URL, NODE_ENV } = process.env;
 
 const dbUrl = NODE_ENV === 'test' ? MONGODB_TEST_URL : MONGODB_URL;
 
-connection.on('connected', () =>
-  console.log(connected('Mongoose default connection is open to ', dbUrl)),
-);
+connection.on('connected', async () => {
+  console.log(connected('Mongoose default connection is open to ', dbUrl));
+  if (NODE_ENV === 'production') {
+    await seedRunner.down();
+    await seedRunner.up();
+  }
+});
 
 connection.on('error', err =>
   console.log(

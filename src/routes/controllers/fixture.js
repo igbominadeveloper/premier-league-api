@@ -56,7 +56,7 @@ export const create = async (req, res) => {
     Fixture.find()
       .then(fixtures => helpers.storeToRedis('fixtures', fixtures))
       .catch(error => {
-        throw Error(error);
+        throw new Error(error);
       });
 
     return helpers.successResponse(res, 201, 'Fixture created successfully', {
@@ -156,7 +156,7 @@ export const update = async (req, res) => {
     Fixture.find()
       .then(result => helpers.storeToRedis('fixtures', result))
       .catch(error => {
-        throw Error(error);
+        throw new Error(error);
       });
 
     return helpers.successResponse(res, 200, 'Fixture updated successfully', {
@@ -181,13 +181,13 @@ export const deleteOne = async (req, res) => {
       Fixture.find()
         .then(result => helpers.storeToRedis('fixtures', result))
         .catch(error => {
-          throw Error(error);
+          throw new Error(error);
         });
 
       return helpers.successResponse(res, 200, 'Fixture Deleted');
     }
     /* istanbul ignore next */
-    throw Error('What could ever happen here anyways?');
+    throw new Error('What could ever happen here anyways?');
   } catch (error) {
     /* istanbul ignore next */
     return helpers.serverError(res, error.message);

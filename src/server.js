@@ -9,7 +9,7 @@ import connectRedis from 'connect-redis';
 
 import router from './routes';
 import dbconnect from './config/db';
-import startRedisClient, { getRedisClient } from './config/redis';
+import redisClient from './config/redis';
 import limiter from './routes/middlewares/rate-limiter';
 
 // Create global app object
@@ -41,7 +41,7 @@ if (NODE_ENV !== 'test') {
     session({
       secret: SECRET_KEY,
       store: new redisStore({
-        client: getRedisClient(),
+        client: redisClient,
       }),
       saveUninitialized: false,
       resave: false,
@@ -57,9 +57,6 @@ app.get('/', (req, res) =>
     message: 'Welcome to Mock premier league',
   }),
 );
-
-// start redis connection
-startRedisClient();
 
 // API routes
 app.use('/api/v1', router);

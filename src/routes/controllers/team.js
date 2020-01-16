@@ -20,7 +20,7 @@ export const create = async (req, res) => {
     Team.find()
       .then(teams => helpers.storeToRedis('teams', teams))
       .catch(error => {
-        throw Error(error);
+        throw new Error(error);
       });
     return helpers.successResponse(res, 201, 'Team created successfully', {
       id: newTeam._id,
@@ -107,7 +107,7 @@ export const update = async (req, res) => {
       Team.find()
         .then(teams => helpers.storeToRedis('teams', teams))
         .catch(error => {
-          throw Error(error);
+          throw new Error(error);
         });
 
       return helpers.successResponse(res, 200, 'Team updated successfully', {
@@ -165,13 +165,13 @@ export const deleteOne = async (req, res) => {
       Team.find()
         .then(result => helpers.storeToRedis('teams', result))
         .catch(error => {
-          throw Error(error);
+          throw new Error(error);
         });
 
       return helpers.successResponse(res, 200, 'Team Deleted');
     }
     /* istanbul ignore next */
-    throw Error('What could ever happen here anyways?');
+    throw new Error('What could ever happen here anyways?');
   } catch (error) {
     /* istanbul ignore next */
     return helpers.serverError(res, error.message);
