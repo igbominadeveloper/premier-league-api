@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import User from '../db/models/User';
 import Fixture from '../db/models/Fixture';
 import Team from '../db/models/Team';
-import { getRedisClient } from '../config/redis';
+import redisClient from '../config/redis';
 
 dotenv.config();
 
@@ -23,9 +23,9 @@ export const checkIfUserExists = keys => User.findOne({ ...keys });
  * @param {Object} res
  * @param {Number} statusCode
  * @param {String} message
- * @param {Object} errors
+ * @param {*} errors
  */
-export const errorResponse = (res, statusCode, message, error = {}) =>
+export const errorResponse = (res, statusCode, message, error = '') =>
   res.status(statusCode).json({
     status: 'error',
     message,
@@ -150,14 +150,14 @@ export const checkIfTeamExists = keys => Team.findOne({ ...keys });
  * @param {string} timeout before removing the value from redis
  */
 export const storeToRedis = (key, values, timeout = 3600) =>
-  getRedisClient().setex(key, timeout, JSON.stringify(values));
+  redisClient.setex(key, timeout, JSON.stringify(values));
 
 /**
  * remove a value from redis
  *
  * @param {string} key of the value to remove from redis
  */
-export const removeFromRedis = key => getRedisClient().del(key);
+export const removeFromRedis = key => redisClient.del(key);
 
 /**
  * get a value from redis
@@ -166,8 +166,8 @@ export const removeFromRedis = key => getRedisClient().del(key);
  * @param {*} callback the function to call afterwards
  */
 export const getFromRedis = (key, callback) =>
-  getRedisClient().get(key, (error, result) => {
-    if (error) throw Error(error);
+  redisClient.get(key, (error, result) => {
+    if (error) throw new Error(error);
     return callback(result);
   });
 

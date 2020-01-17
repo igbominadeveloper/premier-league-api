@@ -12,7 +12,7 @@ import Fixture from '../../db/models/Fixture';
 import Team from '../../db/models/Team';
 
 import { generateToken } from '../../utils/helpers';
-import { getRedisClient } from '../../config/redis';
+import redisClient from '../../config/redis';
 
 const fixturesUrl = '/api/v1/fixtures';
 
@@ -30,7 +30,7 @@ beforeAll(async () => {
 });
 
 afterAll(async done => {
-  getRedisClient().quit();
+  redisClient.quit();
   await mongoose.connection.close();
   done();
 });

@@ -10,7 +10,7 @@ import * as fixtureMocks from '../mocks/fixtures';
 import User from '../../db/models/User';
 import Team from '../../db/models/Team';
 import Fixture from '../../db/models/Fixture';
-import { getRedisClient } from '../../config/redis';
+import redisClient from '../../config/redis';
 
 const searchUrl = '/api/v1/search';
 
@@ -29,7 +29,7 @@ beforeAll(async done => {
 });
 
 afterAll(async done => {
-  getRedisClient().quit();
+  redisClient.quit();
   await mongoose.connection.close();
   done();
 });
